@@ -1,0 +1,33 @@
+spec SmartNeighV1
+
+//Environment controlled input variables (sensors)
+define N := 4;
+define streetSize := N + 1;
+env boolean sidewalkNorth;
+env boolean sidewalkSouth;
+env boolean crossingCrosswalkNS;
+env boolean crossingCrosswalkSN;
+env boolean[streetSize] garbageCansNorth;
+env boolean[streetSize] garbageCansSouth;
+
+
+
+//System controlled output variables (lights)
+sys boolean isCleaning;
+sys boolean lightNorth;
+sys boolean lightSouth;
+sys boolean[streetSize] garbageTruckNorth;
+sys boolean[streetSize] garbageTruckSouth;
+
+//Initial assumptions
+asm !sidewalkNorth & !sidewalkSouth & !crossingCrosswalkNS & !crossingCrosswalkSN;
+//asm for all i: !garbageCansNorth[i];
+
+//Assumptions on pedestrian walking routes
+asm G sidewalkNorth -> next(crossingCrosswalkNS);
+asm G crossingCrosswalkNS -> next(sidewalkSouth);
+asm G sidewalkSouth -> next(crossingCrosswalkSN);
+asm G crossingCrosswalkSN -> next(sidewalkNorth);
+
+
+//Guarntees
