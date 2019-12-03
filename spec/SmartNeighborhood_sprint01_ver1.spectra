@@ -1,0 +1,66 @@
+spec SmartNeighV1
+
+//Environment controlled input variables (sensors)
+define N := 4;
+//define streetSize := N + 1;
+define crosswalkLoc := N/2;
+env boolean sidewalkNorth;
+env boolean sidewalkSouth;
+env boolean crossingCrosswalkNS;
+env boolean crossingCrosswalkSN;
+env boolean[N] garbageCansNorth;
+env boolean[N] garbageCansSouth;
+
+
+
+//System controlled output variables (lights)
+sys boolean isCleaning;
+sys boolean lightNorth;
+sys boolean lightSouth;
+sys boolean[N] garbageTruckNorth;
+sys boolean[N] garbageTruckSouth;
+
+//Initial assumptions
+asm !sidewalkNorth & !sidewalkSouth & !crossingCrosswalkNS & !crossingCrosswalkSN;
+asm all_cans_start_empty:
+	forall i in Int(0..(N-1)). (!garbageCansNorth[i] & !garbageCansSouth[i]);
+
+//Assumptions on pedestrian walking routes
+asm G sidewalkNorth -> next(crossingCrosswalkNS);
+asm G crossingCrosswalkNS -> next(sidewalkSouth);
+asm G sidewalkSouth -> next(crossingCrosswalkSN);
+asm G crossingCrosswalkSN -> next(sidewalkNorth);
+asm GF !sidewalkNorth;
+asm GF !sidewalkSouth;
+asm GF !crossingCrosswalkNS & !crossingCrosswalkSN;
+
+
+//Assumption on garbage cans
+asm GF forall i in Int(0..(N-1)). garbageCansNorth[i];
+asm GF forall i in Int(0..(N-1)). garbageCansSouth[i];
+asm G forall i in Int(0..(N-1)). (garbageTruckNorth[i] & isCleaning -> next(!garbageCansNorth[i]));
+asm G forall i in Int(0..(N-1)). (garbageTruckSouth[i] & isCleaning -> next(!garbageCansSouth[i]));
+
+
+define noTruckNorth := (forall i in Int(0..(N-1)). !garbageTruckNorth[i]);
+define noTruckSouth := (forall i in Int(0..(N-1)). ! garbageTruckSouth[i]);
+define crossing := crossingCrosswalkNS | crossingCrosswalkSN;	
+
+//Initial Guarantees
+gar !lightNorth & !lightSouth;
+gar noTruckNorth & noTruckSouth;
+
+//truck Guarantees
+gar G (crossing & garbageTruckNorth[crosswalkLoc]) ->
+    next(garbageTruckNorth[crosswalkLoc]);  //maybe monitor?
+gar GF forall i in Int(0..(N-1)). garbageCansNorth[i] & garbageTruckNorth[i] & isCleaning;
+gar GF forall i in Int(0..(N-1)). garbageCansSouth[i] & garbageTruckSouth[i] & isCleaning;
+    
+//Light Guarantees
+gar G sidewalkNorth -> lightNorth;
+gar G sidewalkSouth -> lightSouth;
+gar GF !lightNorth;
+gar GF !lightSouth;
+
+
+
