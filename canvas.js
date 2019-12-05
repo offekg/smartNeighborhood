@@ -1,16 +1,6 @@
 // $(document).ready(function(){
-let params = {
-  numHouses: 4,
-  garbageTop: [0,0,1,0],
-  garbageBottom: [1,1,0,0],
-  lightTop: true,
-  lightBottm: false,
-  truckTop: 0,
-  truckBottom: 3,
-  topIsCleaning: false,
-  bottomIsCleaning: true,
-  isNight: false,
-}
+let stateIndex = 0;
+let params = states[stateIndex];
 
 const arrowC = "#ffffff";
 const arrowH = 10;
@@ -55,24 +45,52 @@ animate();
 
 function animate() {
   paintRoad();
-  animateTopTruck();
-  animateBottomTruck()
+  paintStreet(0, 0, canvasW, streetH, false);
+  paintStreet(0, canvasH - streetH, canvasW, streetH, true);
+  let animatingTop = animateTopTruck();
+  let animatingBottom = animateBottomTruck();
+  if (!animatingTop && !animatingBottom && stateIndex < states.length - 1) {
+    stateIndex++;
+    params = states[stateIndex];
+  }
   paintStreetLamps();
   requestAnimationFrame(animate);
 }
 
 function animateTopTruck() {
+  let animating = false;
   ctx.drawImage(truckImg, topTruckX, topTruckY, truckH * truckImageRatio, truckH);
-  if (topTruckX < block * params.truckTop + block / 4) topTruckX += 2;
-  if (params.topIsCleaning && topTruckY > initTopTruckY - 15) topTruckY -= 2;
-  if (!params.topIsCleaning && topTruckY < initTopTruckY) topTruckY += 2;
+  if (topTruckX < block * params.truckTop + block / 4){
+    topTruckX += 3;
+    animating = true;
+  }
+  if (params.topIsCleaning && topTruckY > initTopTruckY - 30){
+    topTruckY -= 1;
+    animating = true;
+  }
+  if (!params.topIsCleaning && topTruckY < initTopTruckY){
+    topTruckY += 1;
+    animating = true;
+  }
+  return animating;
 }
 
 function animateBottomTruck(){
+  let animating = false;
   ctx.drawImage(truckRevImg, bottomTruckX, bottomTruckY, truckH * truckImageRatio, truckH);
-  if (bottomTruckX > block * params.truckBottom + block / 4) bottomTruckX -= 2;
-  if (params.bottomIsCleaning && bottomTruckY < initBottomTruckY + 15) bottomTruckY += 2;
-  if (!params.bottomIsCleaning && bottomTruckY > initBottomTruckY) bottomTruckY -= 2;
+  if (bottomTruckX > block * params.truckBottom + block / 4){
+    bottomTruckX -= 3;
+    animating = true;
+  }
+  if (params.bottomIsCleaning && bottomTruckY < initBottomTruckY + 30) {
+    bottomTruckY += 1;
+    animating = true;
+  }
+  if (!params.bottomIsCleaning && bottomTruckY > initBottomTruckY) {
+    bottomTruckY -= 1;
+    animating = true;
+  }
+  return animating;
 }
 
 function paintBackground(){
