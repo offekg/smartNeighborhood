@@ -1,4 +1,4 @@
-spec SmartNeighV1
+spec SmartNeighborhood_sprint1_ver1
 
 //Environment controlled input variables (sensors)
 define N := 4;
@@ -66,7 +66,7 @@ gar GF garbageCansNorth[3] & garbageTruckNorth[3] & isCleaning;
 gar GF garbageCansSouth[0] & garbageTruckSouth[0] & isCleaning;
 gar GF garbageCansSouth[1] & garbageTruckSouth[1] & isCleaning;
 gar GF garbageCansSouth[2] & garbageTruckSouth[2] & isCleaning;
-//gar GF garbageCansSouth[3] & garbageTruckSouth[3] & isCleaning;
+gar GF garbageCansSouth[3] & garbageTruckSouth[3] & isCleaning;
   
 gar G forall i in Int(0..(N-1)). garbageTruckNorth[i] -> (forall j in Int(0..(N-1)). (j!=i & !garbageTruckNorth[j]));
 gar G forall i in Int(0..(N-1)). garbageTruckSouth[i] -> (forall j in Int(0..(N-1)). (j!=i & !garbageTruckSouth[j]));
