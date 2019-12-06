@@ -53,8 +53,8 @@ asm GF garbageCansNorth[3];
 asm GF garbageCansSouth[3];
 
 //if truck is at can i, and it's cleaning, then the can will be empty on next stage.
-asm G forall i in Int(0..(N-1)). ((garbageTruckNorth_location = i) & isCleaningN) -> next(!garbageCansNorth[i]);
-asm G forall i in Int(0..(N-1)). ((garbageTruckSouth_location = i) & isCleaningS) -> next(!garbageCansSouth[i]);
+asm G forall i in Int(0..(N-1)). ((garbageTruckNorth_location = i) & garbageCansNorth[i] & isCleaningN) -> next(!garbageCansNorth[i]);
+asm G forall i in Int(0..(N-1)). ((garbageTruckSouth_location = i) & garbageCansSouth[i] & isCleaningS) -> next(!garbageCansSouth[i]);
 
 
 define crossing := crossingCrosswalkNS; //| crossingCrosswalkSN;	
@@ -92,6 +92,18 @@ gar G (garbageTruckSouth_location != N) -> (next(garbageTruckSouth_location) = g
 //Trucks not on road, can only appear at can 0.
 gar G garbageTruckNorth_location = N -> (next(garbageTruckNorth_location) = 0 | next(garbageTruckNorth_location) = N);
 gar G garbageTruckSouth_location = N -> (next(garbageTruckSouth_location) = 0 | next(garbageTruckSouth_location) = N);
+
+//Truck will always eventually move
+/*gar GF garbageTruckNorth_location = 0;
+gar GF garbageTruckNorth_location = 1;
+gar GF garbageTruckNorth_location = 2;
+gar GF garbageTruckNorth_location = 3;
+gar GF garbageTruckNorth_location = 4;
+gar GF garbageTruckSouth_location = 0;
+gar GF garbageTruckSouth_location = 1;
+gar GF garbageTruckSouth_location = 2;
+gar GF garbageTruckSouth_location = 3;
+gar GF garbageTruckSouth_location = 4;*/
 
 //Cleaning makes trucks wait one turn in place
 gar G (isCleaningN & garbageTruckNorth_location != N) -> next(garbageTruckNorth_location) = garbageTruckNorth_location & next(isCleaningN) = false;
