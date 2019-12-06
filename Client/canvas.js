@@ -140,17 +140,17 @@ function paintStreetLamp(left, top, width, height, isBottom) {
   ctx.fillRect(left -  lampW / 2, top + 5, lampW , height * 0.9);
   let isOn = isBottom ? params.lightBottm : params.lightTop;
   if (isOn) {
-    ctx.fillStyle = "yellow";
+    ctx.fillStyle = "rgb(255, 255, 0, 0.5)";
     ctx.beginPath();
     ctx.moveTo(left + lampW / 2 + 1, top + height * 0.1);
     ctx.lineTo(left + lampW / 2 + width / 2 - 3, top + height * 0.1);
-    ctx.lineTo(left + lampW / 2 + 1 + width * 1.5 , top + height);
+    ctx.lineTo(left + lampW / 2 + 1 + width * 3 , top + height);
     ctx.lineTo(left + lampW / 2 + 1, top + height);
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(left - lampW / 2 - 1, top + height * 0.1);
     ctx.lineTo(left - lampW / 2 - width / 2 + 3, top + height * 0.1);
-    ctx.lineTo(left - lampW / 2 - 1 - width * 1.5 , top + height);
+    ctx.lineTo(left - lampW / 2 - 1 - width * 3 , top + height);
     ctx.lineTo(left - lampW / 2 - 1, top + height);
     ctx.fill();
   }
