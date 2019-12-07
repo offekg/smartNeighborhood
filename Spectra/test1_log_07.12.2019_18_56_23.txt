@@ -1,0 +1,16 @@
+<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:false, lightSouth:false, energyVal:0, Zn:0>
+<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:false, lightSouth:false, energyVal:0, Zn:0>
+<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:false, lightSouth:false, energyVal:0, Zn:1>
+<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:false, lightSouth:false, energyVal:0, Zn:0>
+<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:false, lightSouth:false, energyVal:0, Zn:1>
+<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:false, lightSouth:false, energyVal:0, Zn:0>
+<sidewalkNorth:true, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:true, lightSouth:false, energyVal:0, Zn:1>
+<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:true, lightNorth:false, lightSouth:true, energyVal:1, Zn:0>
+<sidewalkNorth:false, sidewalkSouth:true, crossingCrosswalkNS:false, lightNorth:false, lightSouth:true, energyVal:0, Zn:1>
+<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:true, lightSouth:false, energyVal:1, Zn:1>
+<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:false, lightSouth:false, energyVal:0, Zn:0>
+<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:false, lightSouth:false, energyVal:0, Zn:1>
+<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:false, lightSouth:false, energyVal:0, Zn:0>
+<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:false, lightSouth:false, energyVal:0, Zn:1>
+<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:false, lightSouth:false, energyVal:0, Zn:0>
+<sidewalkNorth:false, sidewalkSouth:true, crossingCrosswalkNS:false, lightNorth:true, lightSouth:true, energyVal:0, Zn:1>
