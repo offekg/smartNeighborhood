@@ -4,7 +4,7 @@ spec test1
 
 //***Environment controlled input variables (sensors)***
 define N := 4;
-define crosswalkLoc := 1; //between can 1 an 2.
+define crosswalkLoc := 1; //between can 1 and 2.
 //env boolean sidewalkNorth;
 //env boolean sidewalkSouth;
 //env boolean crossingCrosswalkNS;
@@ -12,6 +12,10 @@ define crosswalkLoc := 1; //between can 1 an 2.
 env boolean[N] garbageCansNorth;
 //env boolean[N] garbageCansSouth;
 
+/*counter fullCansNorth(0..N) {
+	fullCansNorth = 0;
+	inc: (next(garbageCansNorth[0]) = true & !garbageCansNorth[0]) ???!?!??! not possible
+} garbageCansNorth[0] + garbageCansNorth[1]  + garbageCansNorth[2] + garbageCansNorth[3];*/ 
 
 
 //***System controlled output variables (lights)***
@@ -110,12 +114,18 @@ gar GF garbageTruckSouth_location = 2;
 gar GF garbageTruckSouth_location = 3;
 gar GF garbageTruckSouth_location = 4;*/
 
+//Truck on empty can will keep moving
+gar G (!garbageCansNorth[0] & garbageTruckNorth_location = 0) -> (next(garbageTruckNorth_location) = 1);
+gar G (!garbageCansNorth[1] & garbageTruckNorth_location = 1) -> (next(garbageTruckNorth_location) = 2);
+gar G (!garbageCansNorth[2] & garbageTruckNorth_location = 2) -> (next(garbageTruckNorth_location) = 3);
+gar G (!garbageCansNorth[3] & garbageTruckNorth_location = 3) -> (next(garbageTruckNorth_location) = 4);
+
 //Cleaning makes trucks wait one turn in place
 gar G (isCleaningN & garbageTruckNorth_location != N) -> ((next(garbageTruckNorth_location) = garbageTruckNorth_location) & (next(isCleaningN) = false));
 //gar G (isCleaningS & garbageTruckSouth_location != N) -> next(garbageTruckSouth_location) = garbageTruckSouth_location & next(isCleaningS) = false;
 
 //Eventually always, trucks will not be on the road.
-gar GF garbageTruckNorth_location = N;
+//gar GF garbageTruckNorth_location = N;
 //gar GF garbageTruckSouth_location = N;
 
 
