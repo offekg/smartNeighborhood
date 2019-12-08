@@ -1,5 +1,5 @@
 
-spec SmartNeighborhood_sprint1_ver3
+spec SmartNeighborhood_sprint01_ver3
 
 //***Environment controlled input variables (sensors)***
 define N := 4;
