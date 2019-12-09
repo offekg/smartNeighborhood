@@ -36,7 +36,8 @@ asm G crossingCrosswalkNS -> next(sidewalkSouth);
 asm GF !sidewalkNorth;
 asm GF !sidewalkSouth;
 asm GF !crossingCrosswalkNS; //& !crossingCrosswalkSN;
-asm G (next(crossingCrosswalkNS)->sidewalkNorth);
+//Pedestrians can't show up on the crosswalk with coming from the north side.
+asm G (next(crossingCrosswalkNS)->sidewalkNorth); 
 
 
 //***Assumptions on garbage cans***
