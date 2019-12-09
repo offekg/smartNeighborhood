@@ -1,2 +1,0 @@
-<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:false, lightSouth:false, Zn:0>
-<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:false, lightSouth:false, Zn:0>

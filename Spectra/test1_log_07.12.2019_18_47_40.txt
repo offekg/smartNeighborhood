@@ -1,9 +1,0 @@
-<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:false, lightSouth:false, Zn:0>
-<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:false, lightSouth:false, Zn:0>
-<sidewalkNorth:true, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:true, lightSouth:false, Zn:1>
-<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:true, lightNorth:true, lightSouth:false, Zn:1>
-<sidewalkNorth:false, sidewalkSouth:true, crossingCrosswalkNS:false, lightNorth:false, lightSouth:true, Zn:0>
-<sidewalkNorth:false, sidewalkSouth:false, crossingCrosswalkNS:false, lightNorth:false, lightSouth:false, Zn:1>
-<sidewalkNorth:true, sidewalkSouth:true, crossingCrosswalkNS:false, lightNorth:true, lightSouth:true, Zn:0>
-<sidewalkNorth:false, sidewalkSouth:true, crossingCrosswalkNS:true, lightNorth:false, lightSouth:true, Zn:0>
-<sidewalkNorth:false, sidewalkSouth:true, crossingCrosswalkNS:false, lightNorth:true, lightSouth:true, Zn:1>
