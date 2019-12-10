@@ -1,5 +1,6 @@
 package src;
 
+import java.awt.image.ColorModel;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +20,13 @@ public class SocketServer {
 		INFO, ERROR, SUCCESS, WAITING
 	}
 
+	private static ServerSocket server;
+	private static int port = 9876;
+	private static NeighberhoodSimulator sim;
+
+	private static String headerPrefixSuffix = "================";
+	private static String creatingSpectraObject = "Creating Spectra object";
+	private static String spectraObjectCreated = "Spectra object created successfully";
 	private static String noDataPayloadMessage = "No data payload attached";
 	private static String waitingMessage = "Waiting for client request";
 	private static String connectionReceivedMessage = "Request received";
@@ -28,9 +36,9 @@ public class SocketServer {
 	private static String shutdownMessage = "Shutting down Socket server!!";
 	private static String notWellFormattedMessage = "Data is not well formated";
 	private static String issueWithMessage = "Issue found with variable ";
+	private static String inputError = "Encountered an issue with request from cloent - " + "ignoring request";
+	private static String outputError = "Encountered an issue with response to cloent";
 
-	private static ServerSocket server;
-	private static int port = 9876;
 	private static int houseCount = 4;
 	private static String[] envVars = new String[] { "sidewalkNorth", "sidewalkSouth", "crossingCrosswalkNS",
 			"crossingCrosswalkSN", "garbageCansNorth", "garbageCansSouth" };
@@ -39,47 +47,72 @@ public class SocketServer {
 		server = new ServerSocket(port);
 		mocker();
 
-		while (true) {
-			byte[] messageByte = new byte[1000];
-			String inputString = "";
+		colorMe(messageTypes.INFO, creatingSpectraObject, true);
+		sim = new NeighberhoodSimulator();
+		colorMe(messageTypes.SUCCESS, spectraObjectCreated, true);
 
-			colorMe(messageTypes.WAITING, waitingMessage);
+		while (true) {
+			colorMe(messageTypes.WAITING, waitingMessage, false);
 			Socket socket = server.accept();
-			colorMe(messageTypes.SUCCESS, connectionReceivedMessage);
+			colorMe(messageTypes.SUCCESS, connectionReceivedMessage, true);
 
 			InputStream ois = socket.getInputStream();
-			DataInputStream in = new DataInputStream(ois);
-
-			int bytesRead = in.read(messageByte);
-			inputString += new String(messageByte, 0, bytesRead);
-
-			JSONObject data = parseinputToDataJsonObject(inputString);
-			HashMap<String, Boolean> dataDict = new HashMap<>();
-
-			if (data != null) {
-				dataDict = parseDataToEnvVars(data);
-				colorMe(messageTypes.INFO, dataReceivingMessage + dataDict.toString());
+			HashMap<String, Boolean> dataDict = inputStreamToDict(ois);
+			if (dataDict.get("data_exists") == true) {
+				createAndSendResponseToClient(socket, systemVarsToJson().toString(), dataDict.get("isClientChrome"));
 			} else {
-				colorMe(messageTypes.ERROR, noDataPayloadMessage);
-			}
-			
-			JSONObject response = systemVarsToJson();
-			NeighberhoodSimulator sim = new NeighberhoodSimulator();
-			
-			try (OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)) {
-				out.write(response.toString());
-				colorMe(messageTypes.INFO, dataSendingMessage + response.toString());
+				// this is just for mocking
+				// createAndSendResponseToClient(socket, systemVarsToJson().toString());
+				createAndSendResponseToClient(socket, "Hello new user", dataDict.get("isClientChrome"));
 			}
 
 			ois.close();
 			socket.close();
-			colorMe(messageTypes.SUCCESS, connectionEndedMessage);
+			colorMe(messageTypes.SUCCESS, connectionEndedMessage, false);
 
-			if (data != null && data.has("exit"))
+			// TODO: exit server gracefully
+			if ("".contains("1"))
 				break;
 		}
-		colorMe(messageTypes.INFO, shutdownMessage);
+		colorMe(messageTypes.INFO, shutdownMessage, true);
 		server.close();
+	}
+
+	public static HashMap<String, Boolean> inputStreamToDict(InputStream ois) {
+		byte[] messageByte = new byte[10000];
+		String inputString = "";
+		int bytesRead = 0;
+
+		try {
+			DataInputStream in = new DataInputStream(ois);
+			bytesRead = in.read(messageByte);
+		} catch (IOException e) {
+			colorMe(messageTypes.ERROR, inputError, true);
+			return null;
+		}
+
+		inputString = new String(messageByte, 0, bytesRead);
+
+		JSONObject data = parseinputToDataJsonObject(inputString);
+		HashMap<String, Boolean> dataDict = new HashMap<>();
+
+		if (data != null) {
+			dataDict = parseDataToEnvVars(data);
+			dataDict.put("data_exists", true);
+
+			colorMe(messageTypes.INFO, dataReceivingMessage + dataDict.toString(), false);
+		} else {
+			dataDict.put("data_exists", false);
+
+			colorMe(messageTypes.ERROR, noDataPayloadMessage, false);
+		}
+		
+		if (inputString.toLowerCase().contains("chrome"))
+			dataDict.put("isClientChrome", true);
+		else
+			dataDict.put("isClientChrome", false);
+
+		return dataDict;
 	}
 
 	private static JSONObject parseinputToDataJsonObject(String input) {
@@ -91,13 +124,41 @@ public class SocketServer {
 				try {
 					js = new JSONObject(s.split("data:")[1]);
 				} catch (JSONException e) {
-					js = null;
-					break;
+					return null;
 				}
 			}
 		}
 
 		return js;
+	}
+
+	private static void createAndSendResponseToClient(Socket socket, String content, boolean isChrome) {
+		String response = "";
+		if (isChrome) {
+			response = "HTTP/1.1 200 OK\r\n" + 
+					"Content-Type: application/json\r\n\r\n" + 
+					"data: " + 
+					content;
+		}
+		else
+			response = "data: " + content;
+
+		try (OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)) {
+			out.write(response);
+			colorMe(messageTypes.INFO, dataSendingMessage + content, false);
+		} catch (Exception e) {
+			colorMe(messageTypes.ERROR, outputError, true);
+		}
+	}
+
+	private static JSONObject systemVarsToJson() {
+		int temp = (mocker_pos++ + 1) % 7;
+		HashMap<String, Object> sysVars = mock_list.get(temp);
+		try {
+			return new JSONObject(sysVars.toString());
+		} catch (JSONException e) {
+			return null;
+		}
 	}
 
 	private static HashMap<String, Boolean> parseDataToEnvVars(JSONObject data) {
@@ -116,8 +177,8 @@ public class SocketServer {
 					envVarsValues.put(envVar, (Boolean) varValue);
 				}
 			} catch (Exception e) {
-				colorMe(messageTypes.ERROR, notWellFormattedMessage);
-				colorMe(messageTypes.ERROR, issueWithMessage + envVar);
+				colorMe(messageTypes.ERROR, notWellFormattedMessage, false);
+				colorMe(messageTypes.ERROR, issueWithMessage + envVar, false);
 				envVarsValues = new HashMap<>();
 				break;
 			}
@@ -129,7 +190,10 @@ public class SocketServer {
 		return envVarsValues;
 	}
 
-	private static void colorMe(messageTypes type, String pleasePaintMe) {
+	private static void colorMe(messageTypes type, String pleasePaintMe, boolean isHeader) {
+		if (isHeader)
+			pleasePaintMe = headerPrefixSuffix + pleasePaintMe + headerPrefixSuffix;
+
 		switch (type) {
 		case ERROR:
 			System.out.println(ConsoleColors.RED_BRIGHT + pleasePaintMe + ConsoleColors.RESET);
@@ -145,20 +209,10 @@ public class SocketServer {
 			break;
 		}
 	}
-	
-	private static JSONObject systemVarsToJson() {
-		int temp = (mocker_pos++ + 1) % 7;
-		HashMap<String, Object> sysVars = mock_list.get(temp);
-		try {
-			return new JSONObject(sysVars.toString());
-		} catch (JSONException e) {
-			return null;
-		}
-	}
 
 	private static List<HashMap<String, Object>> mock_list = new ArrayList<HashMap<String, Object>>();
 	private static int mocker_pos = 0;
-		
+
 	private static void mocker() {
 		HashMap<String, Object> mock = new HashMap<>();
 		mock.put("isCleaningN", false);
@@ -168,7 +222,7 @@ public class SocketServer {
 		mock.put("garbageTruckNorth_location", 0);
 		mock.put("garbageTruckSouth_location", 3);
 		mock_list.add(mock);
-		
+
 		mock = new HashMap<>();
 		mock.put("isCleaningN", false);
 		mock.put("isCleaningS", false);
@@ -177,7 +231,7 @@ public class SocketServer {
 		mock.put("garbageTruckNorth_location", 1);
 		mock.put("garbageTruckSouth_location", 2);
 		mock_list.add(mock);
-		
+
 		mock = new HashMap<>();
 		mock.put("isCleaningN", true);
 		mock.put("isCleaningS", false);
@@ -186,7 +240,7 @@ public class SocketServer {
 		mock.put("garbageTruckNorth_location", 1);
 		mock.put("garbageTruckSouth_location", 1);
 		mock_list.add(mock);
-		
+
 		mock = new HashMap<>();
 		mock.put("isCleaningN", false);
 		mock.put("isCleaningS", true);
@@ -195,7 +249,7 @@ public class SocketServer {
 		mock.put("garbageTruckNorth_location", 2);
 		mock.put("garbageTruckSouth_location", 1);
 		mock_list.add(mock);
-		
+
 		mock = new HashMap<>();
 		mock.put("isCleaningN", false);
 		mock.put("isCleaningS", false);
@@ -204,7 +258,7 @@ public class SocketServer {
 		mock.put("garbageTruckNorth_location", 3);
 		mock.put("garbageTruckSouth_location", 0);
 		mock_list.add(mock);
-		
+
 		mock = new HashMap<>();
 		mock.put("isCleaningN", false);
 		mock.put("isCleaningS", true);
@@ -213,7 +267,7 @@ public class SocketServer {
 		mock.put("garbageTruckNorth_location", 4);
 		mock.put("garbageTruckSouth_location", 0);
 		mock_list.add(mock);
-		
+
 		mock = new HashMap<>();
 		mock.put("isCleaningN", false);
 		mock.put("isCleaningS", false);
