@@ -1,4 +1,5 @@
-spec SmartNeighborhood_sprint01_ver3
+
+spec SmartNeighborhood_sprint02_ver1
 
 //***Environment controlled input variables (sensors)***
 define N := 4;
@@ -78,10 +79,12 @@ gar G (crossing & (garbageTruckNorth_location = crosswalkLoc)) ->
 //   next(garbageTruckSouth_location = crosswalkLoc); 
 
 //Eventually always, the truck will come to clean all full cans.
-gar GF garbageCansNorth[0] & garbageTruckNorth_location = 0 & isCleaningN;
-gar GF garbageCansNorth[1] & garbageTruckNorth_location = 1 & isCleaningN;
-gar GF garbageCansNorth[2] & garbageTruckNorth_location = 2 & isCleaningN;
-gar GF garbageCansNorth[3] & garbageTruckNorth_location = 3 & isCleaningN;
+predicate isCleaningGarbage(Int(0..(3)) i):
+	(garbageCansNorth[i] & (garbageTruckNorth_location = i) & isCleaningN);
+gar GF isCleaningGarbage(0);
+gar GF isCleaningGarbage(1);
+gar GF isCleaningGarbage(2);
+gar GF isCleaningGarbage(3);
 
 /*gar GF garbageCansSouth[0] & garbageTruckSouth_location = 0 & isCleaningS;
 gar GF garbageCansSouth[1] & garbageTruckSouth_location = 1 & isCleaningS;
@@ -103,14 +106,31 @@ gar G (!garbageCansNorth[2] & garbageTruckNorth_location = 2) -> (next(garbageTr
 gar G (!garbageCansNorth[3] & garbageTruckNorth_location = 3) -> (next(garbageTruckNorth_location) = 4);
 
 
+define at_least_one_can_full := 
+	garbageCansNorth[0] | garbageCansNorth[1] | garbageCansNorth[2] | garbageCansNorth[3];
+	
+weight -1
+	at_least_one_can_full & garbageTruckNorth_location = N;
+
+weight 1 
+	!(garbageTruckNorth_location = N) & at_least_one_can_full;
+	
+	
+
 //***Light Guarantees***
 gar G sidewalkNorth -> lightNorth;
 gar G sidewalkSouth -> lightSouth;
 gar GF !lightNorth;
 gar GF !lightSouth;
+gar G !sidewalkNorth -> !lightNorth; 
+gar G !sidewalkSouth-> !lightSouth;
  
-//maybe it doesn't mind loosing a point when it gains one?
+
+/*weight -1
+	lightNorth;
 weight -1
-	(lightNorth & !sidewalkNorth) | (lightSouth & !sidewalkSouth);
+	lightSouth;
 weight 1
-	(lightNorth & sidewalkNorth) | (lightSouth & sidewalkSouth);
+	lightNorth & sidewalkNorth;
+weight 1
+	lightSouth & sidewalkSouth;*/

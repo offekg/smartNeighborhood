@@ -1,10 +1,9 @@
-//version with counter for garbage trucks
 
-spec test
+spec SmartNeighborhood_sprint01_ver3
 
 //***Environment controlled input variables (sensors)***
 define N := 4;
-define crosswalkLoc := 1; //between can 1 an 2.
+define crosswalkLoc := 1; //between can 1 and 2.
 env boolean sidewalkNorth;
 env boolean sidewalkSouth;
 env boolean crossingCrosswalkNS;
@@ -13,15 +12,13 @@ env boolean[N] garbageCansNorth;
 //env boolean[N] garbageCansSouth;
 
 
-
 //***System controlled output variables (lights)***
 sys boolean isCleaningN;
 //sys boolean isCleaningS;
 sys boolean lightNorth;
-//sys boolean lightSouth;
+sys boolean lightSouth;
 sys Int(0..N) garbageTruckNorth_location; //location N means not on the street.
 //sys Int(0..N) garbageTruckSouth_location;
-
 
 //***Initial assumptions***
 //all pedestrian areas start empty
@@ -30,14 +27,17 @@ asm all_cans_start_empty:
 	forall i in Int(0..(N-1)). (!garbageCansNorth[i]);// & !garbageCansSouth[i]);
 
 
+
 //***Assumptions on pedestrian walking routes***
 asm G sidewalkNorth -> next(crossingCrosswalkNS);
 asm G crossingCrosswalkNS -> next(sidewalkSouth);
-//asm G sidewalkSouth -> next(crossingCrosswalkSN);
+//asm G sidewalkSouth -> next(crossingCrosswalkSN); //sims in pool with no rail
 //asm G crossingCrosswalkSN -> next(sidewalkNorth);
 asm GF !sidewalkNorth;
-//asm GF !sidewalkSouth;
+asm GF !sidewalkSouth;
 asm GF !crossingCrosswalkNS; //& !crossingCrosswalkSN;
+//Pedestrians can't show up on the crosswalk with coming from the north side.
+asm G (next(crossingCrosswalkNS)->sidewalkNorth); 
 
 
 //***Assumptions on garbage cans***
@@ -65,17 +65,16 @@ asm G (garbageCansNorth[3] & (garbageTruckNorth_location != 3 | !isCleaningN)) -
 define crossing := crossingCrosswalkNS; //| crossingCrosswalkSN;	
 
 //***Initial Guarantees***
-gar !lightNorth;// & !lightSouth;
+gar !lightNorth & !lightSouth;
 gar garbageTruckNorth_location = N;
 //gar garbageTruckSouth_location = N;
 gar !isCleaningN;
 //gar !isCleaningS;
-//gar noTruckNorth & noTruckSouth;
 
 //***truck Guarantees***
 //If truck is before crosswalk, and someone is crossing, then it won't move
-gar G (crossing & garbageTruckNorth_location = crosswalkLoc) ->
-    next(garbageTruckNorth_location = crosswalkLoc);  //maybe monitor?
+gar G (crossing & (garbageTruckNorth_location = crosswalkLoc)) ->
+    (next(garbageTruckNorth_location) = crosswalkLoc); 
 //gar G (crossing & garbageTruckSouth_location = crosswalkLoc) ->
 //   next(garbageTruckSouth_location = crosswalkLoc); 
 
@@ -91,39 +90,39 @@ gar GF garbageCansSouth[2] & garbageTruckSouth_location = 2 & isCleaningS;
 gar GF garbageCansSouth[3] & garbageTruckSouth_location = 3 & isCleaningS;*/
 
 //Garbage trucks can only move one can forward, or stay in place.
-gar G (garbageTruckNorth_location != N) -> (next(garbageTruckNorth_location) = garbageTruckNorth_location | next(garbageTruckNorth_location) = garbageTruckNorth_location + 1);
+gar G (garbageTruckNorth_location != N) -> ((next(garbageTruckNorth_location) = garbageTruckNorth_location) | (next(garbageTruckNorth_location) = (garbageTruckNorth_location+1)));
 //gar G (garbageTruckSouth_location != N) -> (next(garbageTruckSouth_location) = garbageTruckSouth_location | next(garbageTruckSouth_location) = garbageTruckSouth_location + 1);
 
 //Trucks not on road, can only appear at can 0.
 gar G garbageTruckNorth_location = N -> (next(garbageTruckNorth_location) = 0 | next(garbageTruckNorth_location) = N);
 //gar G garbageTruckSouth_location = N -> (next(garbageTruckSouth_location) = 0 | next(garbageTruckSouth_location) = N);
 
-//Truck will always eventually move
-/*gar GF garbageTruckNorth_location = 0;
-gar GF garbageTruckNorth_location = 1;
-gar GF garbageTruckNorth_location = 2;
-gar GF garbageTruckNorth_location = 3;
-gar GF garbageTruckNorth_location = 4;
-gar GF garbageTruckSouth_location = 0;
-gar GF garbageTruckSouth_location = 1;
-gar GF garbageTruckSouth_location = 2;
-gar GF garbageTruckSouth_location = 3;
-gar GF garbageTruckSouth_location = 4;*/
+//Truck on empty can will keep moving
+gar G (!garbageCansNorth[0] & garbageTruckNorth_location = 0) -> (next(garbageTruckNorth_location) = 1);
+gar G (!garbageCansNorth[1] & garbageTruckNorth_location = 1 & !crossing) -> (next(garbageTruckNorth_location) = 2);
+gar G (!garbageCansNorth[2] & garbageTruckNorth_location = 2) -> (next(garbageTruckNorth_location) = 3);
+gar G (!garbageCansNorth[3] & garbageTruckNorth_location = 3) -> (next(garbageTruckNorth_location) = 4);
 
-//Cleaning makes trucks wait one turn in place
-gar G (isCleaningN & garbageTruckNorth_location != N) -> next(garbageTruckNorth_location) = garbageTruckNorth_location & next(isCleaningN) = false;
-//gar G (isCleaningS & garbageTruckSouth_location != N) -> next(garbageTruckSouth_location) = garbageTruckSouth_location & next(isCleaningS) = false;
 
-//Eventually always, trucks will not be on the road.
-gar GF garbageTruckNorth_location = N;
-//gar GF garbageTruckSouth_location = N;
+/*define at_least_one_can_full := G exists i in Int(0..(N-1)). garbageCansNorth[i];
+	
 
+weight -1
+	
+weight 1*/
 
 //***Light Guarantees***
 gar G sidewalkNorth -> lightNorth;
-//gar G sidewalkSouth -> lightSouth;
+gar G sidewalkSouth -> lightSouth;
 gar GF !lightNorth;
-//gar GF !lightSouth;
-
-
-
+gar GF !lightSouth;
+ 
+//maybe it doesn't mind loosing a point when it gains one?
+weight -1
+	lightNorth & !sidewalkNorth;
+weight -1
+	lightSouth & !sidewalkSouth;
+weight 1
+	lightNorth & sidewalkNorth;
+weight 1
+	lightSouth & sidewalkSouth;

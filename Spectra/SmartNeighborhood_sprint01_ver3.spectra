@@ -104,6 +104,13 @@ gar G (!garbageCansNorth[2] & garbageTruckNorth_location = 2) -> (next(garbageTr
 gar G (!garbageCansNorth[3] & garbageTruckNorth_location = 3) -> (next(garbageTruckNorth_location) = 4);
 
 
+/*define at_least_one_can_full := G exists i in Int(0..(N-1)). garbageCansNorth[i];
+	
+
+weight -1
+	
+weight 1*/
+
 //***Light Guarantees***
 gar G sidewalkNorth -> lightNorth;
 gar G sidewalkSouth -> lightSouth;
@@ -112,6 +119,10 @@ gar GF !lightSouth;
  
 //maybe it doesn't mind loosing a point when it gains one?
 weight -1
-	(lightNorth & !sidewalkNorth) | (lightSouth & !sidewalkSouth);
+	lightNorth & !sidewalkNorth;
+weight -1
+	lightSouth & !sidewalkSouth;
 weight 1
-	(lightNorth & sidewalkNorth) | (lightSouth & sidewalkSouth);
+	lightNorth & sidewalkNorth;
+weight 1
+	lightSouth & sidewalkSouth;
