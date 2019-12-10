@@ -8,7 +8,9 @@ import java.lang.ClassNotFoundException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.json.*;
 
@@ -35,6 +37,7 @@ public class SocketServer {
 
 	public static void main(String args[]) throws IOException, ClassNotFoundException {
 		server = new ServerSocket(port);
+		mocker();
 
 		while (true) {
 			byte[] messageByte = new byte[1000];
@@ -60,20 +63,19 @@ public class SocketServer {
 				colorMe(messageTypes.ERROR, noDataPayloadMessage);
 			}
 			
-			
 			JSONObject response = systemVarsToJson();
 			NeighberhoodSimulator sim = new NeighberhoodSimulator();
-			String test = ("test is " + sim.get_light_north());
+			
 			try (OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)) {
-				out.write(test.toString());
-				colorMe(messageTypes.INFO, dataSendingMessage + test.toString());
+				out.write(response.toString());
+				colorMe(messageTypes.INFO, dataSendingMessage + response.toString());
 			}
 
 			ois.close();
 			socket.close();
 			colorMe(messageTypes.SUCCESS, connectionEndedMessage);
 
-			if (data.has("exit"))
+			if (data != null && data.has("exit"))
 				break;
 		}
 		colorMe(messageTypes.INFO, shutdownMessage);
@@ -89,6 +91,7 @@ public class SocketServer {
 				try {
 					js = new JSONObject(s.split("data:")[1]);
 				} catch (JSONException e) {
+					js = null;
 					break;
 				}
 			}
@@ -144,7 +147,8 @@ public class SocketServer {
 	}
 	
 	private static JSONObject systemVarsToJson() {
-		HashMap<String, Object> sysVars = mocker();
+		int temp = (mocker_pos++ + 1) % 7;
+		HashMap<String, Object> sysVars = mock_list.get(temp);
 		try {
 			return new JSONObject(sysVars.toString());
 		} catch (JSONException e) {
@@ -152,14 +156,71 @@ public class SocketServer {
 		}
 	}
 
-	private static HashMap<String, Object> mocker() {
-		HashMap<String, Object> mock = new HashMap<>();
-		mock.put("isCleaning", true);
-		mock.put("lightNorth", false);
-		mock.put("lightSouth", false);
-		mock.put("northTruckPos", 4);
-		mock.put("southTruckPos", 1);
+	private static List<HashMap<String, Object>> mock_list = new ArrayList<HashMap<String, Object>>();
+	private static int mocker_pos = 0;
 		
-		return mock;
+	private static void mocker() {
+		HashMap<String, Object> mock = new HashMap<>();
+		mock.put("isCleaningN", false);
+		mock.put("isCleaningS", false);
+		mock.put("lightNorth", true);
+		mock.put("lightSouth", false);
+		mock.put("garbageTruckNorth_location", 0);
+		mock.put("garbageTruckSouth_location", 3);
+		mock_list.add(mock);
+		
+		mock = new HashMap<>();
+		mock.put("isCleaningN", false);
+		mock.put("isCleaningS", false);
+		mock.put("lightNorth", true);
+		mock.put("lightSouth", true);
+		mock.put("garbageTruckNorth_location", 1);
+		mock.put("garbageTruckSouth_location", 2);
+		mock_list.add(mock);
+		
+		mock = new HashMap<>();
+		mock.put("isCleaningN", true);
+		mock.put("isCleaningS", false);
+		mock.put("lightNorth", true);
+		mock.put("lightSouth", false);
+		mock.put("garbageTruckNorth_location", 1);
+		mock.put("garbageTruckSouth_location", 1);
+		mock_list.add(mock);
+		
+		mock = new HashMap<>();
+		mock.put("isCleaningN", false);
+		mock.put("isCleaningS", true);
+		mock.put("lightNorth", true);
+		mock.put("lightSouth", true);
+		mock.put("garbageTruckNorth_location", 2);
+		mock.put("garbageTruckSouth_location", 1);
+		mock_list.add(mock);
+		
+		mock = new HashMap<>();
+		mock.put("isCleaningN", false);
+		mock.put("isCleaningS", false);
+		mock.put("lightNorth", true);
+		mock.put("lightSouth", false);
+		mock.put("garbageTruckNorth_location", 3);
+		mock.put("garbageTruckSouth_location", 0);
+		mock_list.add(mock);
+		
+		mock = new HashMap<>();
+		mock.put("isCleaningN", false);
+		mock.put("isCleaningS", true);
+		mock.put("lightNorth", true);
+		mock.put("lightSouth", true);
+		mock.put("garbageTruckNorth_location", 4);
+		mock.put("garbageTruckSouth_location", 0);
+		mock_list.add(mock);
+		
+		mock = new HashMap<>();
+		mock.put("isCleaningN", false);
+		mock.put("isCleaningS", false);
+		mock.put("lightNorth", true);
+		mock.put("lightSouth", false);
+		mock.put("garbageTruckNorth_location", 4);
+		mock.put("garbageTruckSouth_location", -1);
+		mock_list.add(mock);
 	}
 }
