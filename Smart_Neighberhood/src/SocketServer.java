@@ -1,17 +1,23 @@
 package src;
 
 import java.awt.image.ColorModel;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.lang.ClassNotFoundException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.json.*;
 
@@ -23,6 +29,8 @@ public class SocketServer {
 	private static ServerSocket server;
 	private static int port = 9876;
 	private static NeighberhoodSimulator sim;
+	private static final File WEB_ROOT = new File(".");
+	private static final String DEFAULT_FILE = "index.html";
 
 	private static String headerPrefixSuffix = "================";
 	private static String creatingSpectraObject = "Creating Spectra object";
@@ -42,13 +50,15 @@ public class SocketServer {
 	private static int houseCount = 4;
 	private static String[] envVars = new String[] { "sidewalkNorth", "sidewalkSouth", "crossingCrosswalkNS",
 			"crossingCrosswalkSN", "garbageCansNorth", "garbageCansSouth" };
+	
+	private static String input;
 
 	public static void main(String args[]) throws IOException, ClassNotFoundException {
 		server = new ServerSocket(port);
 		mocker();
 
 		colorMe(messageTypes.INFO, creatingSpectraObject, true);
-		sim = new NeighberhoodSimulator();
+//		sim = new NeighberhoodSimulator();
 		colorMe(messageTypes.SUCCESS, spectraObjectCreated, true);
 
 		while (true) {
@@ -58,6 +68,42 @@ public class SocketServer {
 
 			InputStream ois = socket.getInputStream();
 			HashMap<String, Boolean> dataDict = inputStreamToDict(ois);
+			System.out.println(dataDict.toString());
+			StringTokenizer parse = new StringTokenizer(input);
+			String method = parse.nextToken().toUpperCase(); // we get the HTTP method of the client
+			// we get file requested
+			String path = parse.nextToken().toLowerCase();
+			if (method.equals("GET")) {
+				if (path.endsWith("/")) {
+					path += DEFAULT_FILE;
+				}
+				File file = new File(WEB_ROOT, path);
+				int fileLength = (int) file.length();
+				String content = getContentType(path);
+				
+				if (method.equals("GET")) { // GET method so we return content
+					byte[] fileData = readFileData(file, fileLength);
+					
+					PrintWriter out = new PrintWriter(socket.getOutputStream());
+					// get binary output stream to client (for requested data)
+					BufferedOutputStream dataOut = new BufferedOutputStream(socket.getOutputStream());
+					// send HTTP Headers
+					out.println("HTTP/1.1 200 OK");
+					out.println("Server: Java HTTP Server from SSaurel : 1.0");
+					out.println("Date: " + new Date());
+					out.println("Content-type: " + content);
+					out.println("Content-length: " + fileLength);
+					out.println(); // blank line between headers and content, very important !
+					out.flush(); // flush character output stream buffer
+					
+					dataOut.write(fileData, 0, fileLength);
+					dataOut.flush();
+					
+					out.close();
+					dataOut.close();
+				}
+
+			}
 			if (dataDict.get("data_exists") == true) {
 				createAndSendResponseToClient(socket, systemVarsToJson().toString(), dataDict.get("isClientChrome"));
 			} else {
@@ -78,6 +124,28 @@ public class SocketServer {
 		server.close();
 	}
 
+	private static byte[] readFileData(File file, int fileLength) throws IOException {
+		FileInputStream fileIn = null;
+		byte[] fileData = new byte[fileLength];
+		
+		try {
+			fileIn = new FileInputStream(file);
+			fileIn.read(fileData);
+		} finally {
+			if (fileIn != null) 
+				fileIn.close();
+		}
+		
+		return fileData;
+	}
+	
+	private static String getContentType(String fileRequested) {
+		if (fileRequested.endsWith(".htm")  ||  fileRequested.endsWith(".html"))
+			return "text/html";
+		else
+			return "text/plain";
+	}
+		
 	public static HashMap<String, Boolean> inputStreamToDict(InputStream ois) {
 		byte[] messageByte = new byte[10000];
 		String inputString = "";
@@ -96,10 +164,11 @@ public class SocketServer {
 		JSONObject data = parseinputToDataJsonObject(inputString);
 		HashMap<String, Boolean> dataDict = new HashMap<>();
 
+		input = inputString;
+
 		if (data != null) {
 			dataDict = parseDataToEnvVars(data);
 			dataDict.put("data_exists", true);
-
 			colorMe(messageTypes.INFO, dataReceivingMessage + dataDict.toString(), false);
 		} else {
 			dataDict.put("data_exists", false);
