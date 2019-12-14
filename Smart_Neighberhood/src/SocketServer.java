@@ -1,6 +1,5 @@
 package src;
 
-import java.awt.image.ColorModel;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
@@ -50,7 +49,7 @@ public class SocketServer {
 	private static int houseCount = 4;
 	private static String[] envVars = new String[] { "sidewalkNorth", "sidewalkSouth", "crossingCrosswalkNS",
 			"crossingCrosswalkSN", "garbageCansNorth", "garbageCansSouth" };
-	
+
 	private static String input;
 
 	public static void main(String args[]) throws IOException, ClassNotFoundException {
@@ -68,48 +67,21 @@ public class SocketServer {
 
 			InputStream ois = socket.getInputStream();
 			HashMap<String, Boolean> dataDict = inputStreamToDict(ois);
-			System.out.println(dataDict.toString());
+			
 			StringTokenizer parse = new StringTokenizer(input);
 			String method = parse.nextToken().toUpperCase(); // we get the HTTP method of the client
-			// we get file requested
-			String path = parse.nextToken().toLowerCase();
-			if (method.equals("GET")) {
-				if (path.endsWith("/")) {
-					path += DEFAULT_FILE;
-				}
-				File file = new File(WEB_ROOT, path);
-				int fileLength = (int) file.length();
-				String content = getContentType(path);
-				
-				if (method.equals("GET")) { // GET method so we return content
-					byte[] fileData = readFileData(file, fileLength);
-					
-					PrintWriter out = new PrintWriter(socket.getOutputStream());
-					// get binary output stream to client (for requested data)
-					BufferedOutputStream dataOut = new BufferedOutputStream(socket.getOutputStream());
-					// send HTTP Headers
-					out.println("HTTP/1.1 200 OK");
-					out.println("Server: Java HTTP Server from SSaurel : 1.0");
-					out.println("Date: " + new Date());
-					out.println("Content-type: " + content);
-					out.println("Content-length: " + fileLength);
-					out.println(); // blank line between headers and content, very important !
-					out.flush(); // flush character output stream buffer
-					
-					dataOut.write(fileData, 0, fileLength);
-					dataOut.flush();
-					
-					out.close();
-					dataOut.close();
-				}
 
-			}
-			if (dataDict.get("data_exists") == true) {
-				createAndSendResponseToClient(socket, systemVarsToJson().toString(), dataDict.get("isClientChrome"));
-			} else {
-				// this is just for mocking
-				// createAndSendResponseToClient(socket, systemVarsToJson().toString());
-				createAndSendResponseToClient(socket, "Hello new user", dataDict.get("isClientChrome"));
+			if (method.equals("GET"))
+				// Used only for creating new session.
+				newConnectionFound(socket, parse);
+			else {
+				if (dataDict.get("data_exists") == true) {
+					createAndSendResponseToClient(socket, systemVarsToJson().toString(), dataDict.get("isClientChrome"));
+				} else {
+					// this is just for mocking
+					// createAndSendResponseToClient(socket, systemVarsToJson().toString());
+					createAndSendResponseToClient(socket, "Hello new user", dataDict.get("isClientChrome"));
+				}
 			}
 
 			ois.close();
@@ -124,28 +96,60 @@ public class SocketServer {
 		server.close();
 	}
 
+	private static void newConnectionFound(Socket socket, StringTokenizer parse) throws IOException {
+		// we get file requested
+		String path = parse.nextToken().toLowerCase();
+		if (path.endsWith("/")) {
+			path += DEFAULT_FILE;
+		}
+		File file = new File(WEB_ROOT, path);
+		int fileLength = (int) file.length();
+		String content = getContentType(path);
+
+		byte[] fileData = readFileData(file, fileLength);
+
+		PrintWriter out = new PrintWriter(socket.getOutputStream());
+		// get binary output stream to client (for requested data)
+		BufferedOutputStream dataOut = new BufferedOutputStream(socket.getOutputStream());
+		// send HTTP Headers
+		out.println("HTTP/1.1 200 OK");
+		out.println("Server: Java HTTP Server from SSaurel : 1.0");
+		out.println("Date: " + new Date());
+		out.println("Content-type: " + content);
+		out.println("Content-length: " + fileLength);
+		out.println(); // blank line between headers and content, very important !
+		out.flush(); // flush character output stream buffer
+
+		dataOut.write(fileData, 0, fileLength);
+		dataOut.flush();
+
+		out.close();
+		dataOut.close();
+
+	}
+
 	private static byte[] readFileData(File file, int fileLength) throws IOException {
 		FileInputStream fileIn = null;
 		byte[] fileData = new byte[fileLength];
-		
+
 		try {
 			fileIn = new FileInputStream(file);
 			fileIn.read(fileData);
 		} finally {
-			if (fileIn != null) 
+			if (fileIn != null)
 				fileIn.close();
 		}
-		
+
 		return fileData;
 	}
-	
+
 	private static String getContentType(String fileRequested) {
-		if (fileRequested.endsWith(".htm")  ||  fileRequested.endsWith(".html"))
+		if (fileRequested.endsWith(".htm") || fileRequested.endsWith(".html"))
 			return "text/html";
 		else
 			return "text/plain";
 	}
-		
+
 	public static HashMap<String, Boolean> inputStreamToDict(InputStream ois) {
 		byte[] messageByte = new byte[10000];
 		String inputString = "";
@@ -175,7 +179,7 @@ public class SocketServer {
 
 			colorMe(messageTypes.ERROR, noDataPayloadMessage, false);
 		}
-		
+
 		if (inputString.toLowerCase().contains("chrome"))
 			dataDict.put("isClientChrome", true);
 		else
@@ -204,12 +208,8 @@ public class SocketServer {
 	private static void createAndSendResponseToClient(Socket socket, String content, boolean isChrome) {
 		String response = "";
 		if (isChrome) {
-			response = "HTTP/1.1 200 OK\r\n" + 
-					"Content-Type: application/json\r\n\r\n" + 
-					"data: " + 
-					content;
-		}
-		else
+			response = "HTTP/1.1 200 OK\r\n" + "Content-Type: application/json\r\n\r\n" + "data: " + content;
+		} else
 			response = "data: " + content;
 
 		try (OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)) {
