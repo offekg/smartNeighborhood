@@ -1,0 +1,177 @@
+[
+  {
+    "numHouses": 4,
+    "garbageTop": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "garbageBottom": [
+      1,
+      1,
+      0,
+      0
+    ],
+    "lightTop": true,
+    "lightBottm": false,
+    "truckTop": 0,
+    "truckBottom": 3,
+    "topIsCleaning": false,
+    "bottomIsCleaning": false,
+    "isNight": false
+  },
+  {
+    "numHouses": 4,
+    "garbageTop": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "garbageBottom": [
+      1,
+      1,
+      0,
+      0
+    ],
+    "lightTop": true,
+    "lightBottm": true,
+    "truckTop": 1,
+    "truckBottom": 2,
+    "topIsCleaning": false,
+    "bottomIsCleaning": false,
+    "isNight": false
+  },
+  {
+    "numHouses": 4,
+    "garbageTop": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "garbageBottom": [
+      1,
+      1,
+      0,
+      0
+    ],
+    "lightTop": true,
+    "lightBottm": false,
+    "truckTop": 1,
+    "truckBottom": 1,
+    "topIsCleaning": true,
+    "bottomIsCleaning": false,
+    "isNight": false
+  },
+  {
+    "numHouses": 4,
+    "garbageTop": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "garbageBottom": [
+      1,
+      1,
+      0,
+      0
+    ],
+    "lightTop": true,
+    "lightBottm": true,
+    "truckTop": 2,
+    "truckBottom": 1,
+    "topIsCleaning": false,
+    "bottomIsCleaning": true,
+    "isNight": false
+  },
+  {
+    "numHouses": 4,
+    "garbageTop": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "garbageBottom": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "lightTop": true,
+    "lightBottm": false,
+    "truckTop": 3,
+    "truckBottom": 0,
+    "topIsCleaning": false,
+    "bottomIsCleaning": false,
+    "isNight": false
+  },
+  {
+    "numHouses": 4,
+    "garbageTop": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "garbageBottom": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "lightTop": true,
+    "lightBottm": true,
+    "truckTop": 4,
+    "truckBottom": 0,
+    "topIsCleaning": false,
+    "bottomIsCleaning": true,
+    "isNight": false
+  },{
+    "numHouses": 4,
+    "garbageTop": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "garbageBottom": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "lightTop": true,
+    "lightBottm": false,
+    "truckTop": 3,
+    "truckBottom": 0,
+    "topIsCleaning": false,
+    "bottomIsCleaning": false,
+    "isNight": false
+  },
+  {
+    "numHouses": 4,
+    "garbageTop": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "garbageBottom": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "lightTop": true,
+    "lightBottm": false,
+    "truckTop": 4,
+    "truckBottom": -1,
+    "topIsCleaning": false,
+    "bottomIsCleaning": false,
+    "isNight": false
+  }
+]

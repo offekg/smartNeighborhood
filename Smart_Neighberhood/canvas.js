@@ -1,6 +1,7 @@
-// $(document).ready(function(){
+$(document).ready(function(){
 let stateIndex = 0;
-let params = states[stateIndex];
+let states;
+let params;
 
 const arrowC = "#ffffff";
 const arrowH = 10;
@@ -40,8 +41,22 @@ var truckImg = new Image();
 truckImg.src = "truck.png";
 var truckRevImg = new Image();
 truckRevImg.src = "truckRev.png";
-paintBackground();
-animate();
+getStates();
+
+function getStates () {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+     console.log(JSON.parse(this.responseText));
+     states = JSON.parse(this.responseText);
+     params = states[stateIndex];
+     paintBackground();
+     animate();
+    }
+  };
+  xhttp.open("GET", "/states.json", true);
+  xhttp.send();
+}
 
 function animate() {
   paintRoad();
@@ -140,7 +155,8 @@ function paintStreetLamp(left, top, width, height, isBottom) {
   ctx.fillRect(left -  lampW / 2, top + 5, lampW , height * 0.9);
   let isOn = isBottom ? params.lightBottm : params.lightTop;
   if (isOn) {
-    ctx.fillStyle = "rgb(255, 255, 0, 0.5)";
+    // ctx.fillStyle = "rgb(255, 255, 0, 0.5)";
+    ctx.fillStyle = "yellow";
     ctx.beginPath();
     ctx.moveTo(left + lampW / 2 + 1, top + height * 0.1);
     ctx.lineTo(left + lampW / 2 + width / 2 - 3, top + height * 0.1);
@@ -214,4 +230,4 @@ function paintArrow(left, top, width, height, isLeft) {
     ctx.fill();
   }
 }
-// });
+});
