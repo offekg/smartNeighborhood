@@ -49,6 +49,8 @@ public class SocketServer {
 	private static int houseCount = 4;
 	private static String[] envVars = new String[] { "sidewalkNorth", "sidewalkSouth", "crossingCrosswalkNS",
 			"crossingCrosswalkSN", "garbageCansNorth", "garbageCansSouth" };
+	private static String[] sysVars = new String[] { "isCleaningN", "isCleaningS", "lightNorth", 
+			"lightSouth", "garbageTruckNorth_location", "garbageTruckSouth_location" };
 
 	private static String input;
 
@@ -66,7 +68,7 @@ public class SocketServer {
 			colorMe(messageTypes.SUCCESS, connectionReceivedMessage, true);
 
 			InputStream ois = socket.getInputStream();
-			HashMap<String, Boolean> dataDict = inputStreamToDict(ois);
+			HashMap<String, Object> dataDict = inputStreamToDict(ois);
 			
 			StringTokenizer parse = new StringTokenizer(input);
 			String method = parse.nextToken().toUpperCase(); // we get the HTTP method of the client
@@ -75,12 +77,12 @@ public class SocketServer {
 				// Used only for creating new session.
 				newConnectionFound(socket, parse);
 			else {
-				if (dataDict.get("data_exists") == true) {
-					createAndSendResponseToClient(socket, systemVarsToJson().toString(), dataDict.get("isClientChrome"));
+				if ((Boolean)dataDict.get("data_exists") == true) {
+					createAndSendResponseToClient(socket, systemVarsToJson().toString(), (Boolean)dataDict.get("isClientChrome"));
 				} else {
 					// this is just for mocking
 					// createAndSendResponseToClient(socket, systemVarsToJson().toString());
-					createAndSendResponseToClient(socket, "Hello new user", dataDict.get("isClientChrome"));
+					createAndSendResponseToClient(socket, "Hello new user", (Boolean)dataDict.get("isClientChrome"));
 				}
 			}
 
@@ -150,7 +152,7 @@ public class SocketServer {
 			return "text/plain";
 	}
 
-	public static HashMap<String, Boolean> inputStreamToDict(InputStream ois) {
+	public static HashMap<String, Object> inputStreamToDict(InputStream ois) {
 		byte[] messageByte = new byte[10000];
 		String inputString = "";
 		int bytesRead = 0;
@@ -166,7 +168,7 @@ public class SocketServer {
 		inputString = new String(messageByte, 0, bytesRead);
 
 		JSONObject data = parseinputToDataJsonObject(inputString);
-		HashMap<String, Boolean> dataDict = new HashMap<>();
+		HashMap<String, Object> dataDict = new HashMap<>();
 
 		input = inputString;
 
@@ -230,18 +232,19 @@ public class SocketServer {
 		}
 	}
 
-	private static HashMap<String, Boolean> parseDataToEnvVars(JSONObject data) {
-		HashMap<String, Boolean> envVarsValues = new HashMap<>();
+	private static HashMap<String, Object> parseDataToEnvVars(JSONObject data) {
+		HashMap<String, Object> envVarsValues = new HashMap<>();
 
 		for (String envVar : envVars) {
 			try {
 				Object varValue = data.get(envVar);
 				if (envVar == "garbageCansNorth" || envVar == "garbageCansSouth") {
-					JSONArray subData = (JSONArray) varValue;
+					/*JSONArray subData = (JSONArray) varValue;
 
 					for (Integer i = 0; i < houseCount; i++) {
 						envVarsValues.put(envVar + i.toString(), Boolean.parseBoolean(subData.get(i).toString()));
-					}
+					}*/
+					envVarsValues.put(envVar, (Boolean[]) varValue);
 				} else {
 					envVarsValues.put(envVar, (Boolean) varValue);
 				}
