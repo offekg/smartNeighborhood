@@ -1,7 +1,10 @@
 $(document).ready(function(){
 let stateIndex = 0;
+let currentState;
+let nextState;
+let isNextUpdated;
 let states;
-let params;
+const numStates = 8;
 
 const arrowC = "#ffffff";
 const arrowH = 10;
@@ -41,20 +44,26 @@ var truckImg = new Image();
 truckImg.src = "truck.png";
 var truckRevImg = new Image();
 truckRevImg.src = "truckRev.png";
-getStates();
+getNextState();
 
-function getStates () {
-  var xhttp = new XMLHttpRequest();
+function getNextState() {
+  waitingResponse = true;
+  let xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
      console.log(JSON.parse(this.responseText));
-     states = JSON.parse(this.responseText);
-     params = states[stateIndex];
-     paintBackground();
-     animate();
+     nextState = JSON.parse(this.responseText);
+     isNextUpdated = true;
+     waitingResponse = false;
+     if (stateIndex == 0) {
+       currentState = nextState;
+       isNextUpdated = false;
+       stateIndex++;
+       animate();
+     }
     }
   };
-  xhttp.open("GET", "/states.json", true);
+  xhttp.open("GET", "/states/" + stateIndex + ".json", true);
   xhttp.send();
 }
 
@@ -64,9 +73,17 @@ function animate() {
   paintStreet(0, canvasH - streetH, canvasW, streetH, true);
   let animatingTop = animateTopTruck();
   let animatingBottom = animateBottomTruck();
-  if (!animatingTop && !animatingBottom && stateIndex < states.length - 1) {
-    stateIndex++;
-    params = states[stateIndex];
+  if (!animatingTop && !animatingBottom && stateIndex < numStates) {
+    if (isNextUpdated) {
+      currentState = nextState;
+      isNextUpdated = false;
+      stateIndex++;
+      } else {
+      console.log("State not updated. Index:" + stateIndex);
+    }
+  }
+  if (!isNextUpdated && !waitingResponse && stateIndex < numStates) {
+    getNextState();
   }
   paintStreetLamps();
   requestAnimationFrame(animate);
@@ -75,15 +92,15 @@ function animate() {
 function animateTopTruck() {
   let animating = false;
   ctx.drawImage(truckImg, topTruckX, topTruckY, truckH * truckImageRatio, truckH);
-  if (topTruckX < block * params.truckTop + block / 4){
+  if (topTruckX < block * currentState.truckTop + block / 4){
     topTruckX += 3;
     animating = true;
   }
-  if (params.topIsCleaning && topTruckY > initTopTruckY - 30){
+  if (currentState.topIsCleaning && topTruckY > initTopTruckY - 30){
     topTruckY -= 1;
     animating = true;
   }
-  if (!params.topIsCleaning && topTruckY < initTopTruckY){
+  if (!currentState.topIsCleaning && topTruckY < initTopTruckY){
     topTruckY += 1;
     animating = true;
   }
@@ -93,15 +110,15 @@ function animateTopTruck() {
 function animateBottomTruck(){
   let animating = false;
   ctx.drawImage(truckRevImg, bottomTruckX, bottomTruckY, truckH * truckImageRatio, truckH);
-  if (bottomTruckX > block * params.truckBottom + block / 4){
+  if (bottomTruckX > block * currentState.truckBottom + block / 4){
     bottomTruckX -= 3;
     animating = true;
   }
-  if (params.bottomIsCleaning && bottomTruckY < initBottomTruckY + 30) {
+  if (currentState.bottomIsCleaning && bottomTruckY < initBottomTruckY + 30) {
     bottomTruckY += 1;
     animating = true;
   }
-  if (!params.bottomIsCleaning && bottomTruckY > initBottomTruckY) {
+  if (!currentState.bottomIsCleaning && bottomTruckY > initBottomTruckY) {
     bottomTruckY -= 1;
     animating = true;
   }
@@ -153,7 +170,7 @@ function paintStreetLamp(left, top, width, height, isBottom) {
   ctx.arc(left, top + height * 0.1, width / 2, Math.PI, 0);
   ctx.fill();
   ctx.fillRect(left -  lampW / 2, top + 5, lampW , height * 0.9);
-  let isOn = isBottom ? params.lightBottm : params.lightTop;
+  let isOn = isBottom ? currentState.lightBottm : currentState.lightTop;
   if (isOn) {
     // ctx.fillStyle = "rgb(255, 255, 0, 0.5)";
     ctx.fillStyle = "yellow";
@@ -183,7 +200,7 @@ function paintHouse(index, isBottom, left, top, width, height) {
   ctx.fill();
   ctx.fillStyle = trashCanC;
   ctx.fillRect(left + width + 5, top + height / 2, width / 4, height / 2);
-  let hasGarbage = isBottom ? params.garbageBottom[index] : params.garbageTop[index];
+  let hasGarbage = isBottom ? currentState.garbageBottom[index] : currentState.garbageTop[index];
   if (hasGarbage) {
     ctx.fillStyle = trashC;
     ctx.beginPath();
@@ -197,7 +214,7 @@ function paintHouse(index, isBottom, left, top, width, height) {
   if (!isBottom) {
     ctx.fillStyle = "brown";
     ctx.fillRect(left + width * 4 / 6, top + height / 2, width / 6, height / 2);
-    ctx.fillStyle = params.isNight ? "yellow" : "lightblue";
+    ctx.fillStyle = currentState.isNight ? "yellow" : "lightblue";
     ctx.fillRect(left + width * 1 / 6, top + height / 4, width / 5, height / 3);
   }
 }
