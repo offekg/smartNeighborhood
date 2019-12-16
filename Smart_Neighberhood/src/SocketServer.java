@@ -72,6 +72,8 @@ public class SocketServer {
 			
 			StringTokenizer parse = new StringTokenizer(input);
 			String method = parse.nextToken().toUpperCase(); // we get the HTTP method of the client
+			String path = parse.nextToken().toLowerCase(); // we get file requested
+
 
 			if (method.equals("GET"))
 				// Used only for creating new session.
@@ -99,8 +101,6 @@ public class SocketServer {
 	}
 
 	private static void newConnectionFound(Socket socket, StringTokenizer parse) throws IOException {
-		// we get file requested
-		String path = parse.nextToken().toLowerCase();
 		if (path.endsWith("/")) {
 			path += DEFAULT_FILE;
 		}
