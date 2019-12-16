@@ -8,27 +8,31 @@ const numStates = 8;
 
 const animationTime = 96;
 
-const arrowC = "#ffffff";
+let opacity = 0;
+const lightC = "#fff200";
+let roadC = "#656262";
+let arrowC = "#ffffff";
 const arrowH = 10;
 const arrowW = 40;
 const canvas = document.querySelector('canvas');
 const canvasH = canvas.height;
 const canvasW = canvas.width;
 const crossingBlockH = 17;
-const crossingC = "#ffffff";
+let crossingC = "#ffffff";
 const crossingSpaceH = 10;
 const crossingW = 80;
-const ctx = canvas.getContext('2d');
-const houseC = "#fcfcfc";
+let ctx = canvas.getContext('2d');
+let houseC = "#fcfcfc";
+let roofC = "#bd3d24";
 const houseH = 52;
 const houseW = 62;
 const numHouses = 4;
-const sidewalkC = "#efe5b0";
+let sidewalkC = "#efe5b0";
 const sidewalkH = 30;
-const streetC = "#3da744";
+let streetC = "#3da744";
 const streetH = 125;
-const trashC = "black";
-const trashCanC = "#c2c2c2";
+let trashC = "black";
+let trashCanC = "#c2c2c2";
 const roadH = canvasH - 2 * streetH;
 const truckH = (roadH*2)/3;
 const truckImageRatio = 564/516;
@@ -85,9 +89,7 @@ function getNextState() {
 }
 
 function animate() {
-  paintRoad();
-  paintStreet(0, 0, canvasW, streetH, false);
-  paintStreet(0, canvasH - streetH, canvasW, streetH, true);
+  paintBackground();
   paintStreetLamps(false);
   let animatingTop = animateTopTruck();
   let animatingBottom = animateBottomTruck();
@@ -111,7 +113,7 @@ function animate() {
 function animateTopTruck() {
   let animating = false;
   ctx.drawImage(truckImg, topTruckX, topTruckY, truckH * truckImageRatio, truckH);
-  if (topTruckX < block * currentState.truckTop + block / 4){
+  if (topTruckX < block * currentState.truckTop + block / 4) {
     topTruckX += block / animationTime;
     animating = true;
   }
@@ -166,10 +168,31 @@ function paintBackground(){
   paintRoad();
   paintStreet(0, 0, canvasW, streetH, false);
   paintStreet(0, canvasH - streetH, canvasW, streetH, true);
+  paintNight();
+  if (opacity > 0.2) {
+    for (i = 0; i < numHouses; i++) {
+        paintHouseLight(block * i + block / 2 - houseW/2, 50 , houseW, houseH, lightC);
+    }
+  }
+}
+
+function paintNight() {
+  if (currentState.isNight  && opacity < 0.5) {
+    opacity += 0.5 / animationTime;
+  }
+  if (!currentState.isNight  && opacity > 0) {
+    opacity -= 0.4 / animationTime;
+  }
+  if (opacity > 0) {
+    ctx.globalAlpha = opacity;
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvasW, canvasH);
+    ctx.globalAlpha = 1;
+  }
 }
 
 function paintRoad() {
-  ctx.fillStyle = "#656262";
+  ctx.fillStyle = roadC;
   ctx.fillRect(0, streetH, canvasW, canvasH - 2 *streetH);
   // painting seperation line
   ctx.fillStyle = "#c5c5c5";
@@ -213,8 +236,8 @@ function paintStreetLamp(left, top, width, height, isBottom) {
   ctx.fillRect(left -  lampW / 2, top + 5, lampW , height * 0.9);
   let isOn = isBottom ? currentState.lightBottm : currentState.lightTop;
   if (isOn) {
-    // ctx.fillStyle = "rgb(255, 255, 0, 0.5)";
     ctx.fillStyle = "yellow";
+    ctx.globalAlpha = 0.7;
     ctx.beginPath();
     ctx.moveTo(left + lampW / 2 + 1, top + height * 0.1);
     ctx.lineTo(left + lampW / 2 + width / 2 - 3, top + height * 0.1);
@@ -227,13 +250,14 @@ function paintStreetLamp(left, top, width, height, isBottom) {
     ctx.lineTo(left - lampW / 2 - 1 - width * 3 , top + height);
     ctx.lineTo(left - lampW / 2 - 1, top + height);
     ctx.fill();
+    ctx.globalAlpha = 1;
   }
 }
 
 function paintHouse(index, isBottom, left, top, width, height) {
   ctx.fillStyle = houseC;
   ctx.fillRect(left, top, width, height);
-  ctx.fillStyle = "#bd3d24";
+  ctx.fillStyle = roofC;
   ctx.beginPath();
   ctx.moveTo(left, top);
   ctx.lineTo(left+width/2, top-30);
@@ -256,12 +280,17 @@ function paintHouse(index, isBottom, left, top, width, height) {
     ctx.lineTo(left + width + trashOffset - 2 + trashCanW, top + trashCanH);
     ctx.fill();
   }
+
   if (!isBottom) {
     ctx.fillStyle = "brown";
     ctx.fillRect(left + width * 4 / 6, top + height / 2, width / 6, height / 2);
-    ctx.fillStyle = currentState.isNight ? "yellow" : "lightblue";
-    ctx.fillRect(left + width * 1 / 6, top + height / 4, width / 5, height / 3);
+    paintHouseLight(left, top, width, height, "lightblue");
   }
+}
+
+function paintHouseLight(left, top, width, height, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(left + width * 1 / 6, top + height / 4, width / 5, height / 3);
 }
 
 function paintCrossing(left, top, width, height){
