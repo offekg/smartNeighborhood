@@ -12,10 +12,8 @@ import java.lang.ClassNotFoundException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.StringTokenizer;
 
 import org.json.*;
@@ -49,17 +47,16 @@ public class SocketServer {
 	private static int houseCount = 4;
 	private static String[] envVars = new String[] { "sidewalkNorth", "sidewalkSouth", "crossingCrosswalkNS",
 			"crossingCrosswalkSN", "garbageCansNorth", "garbageCansSouth" };
-	private static String[] sysVars = new String[] { "isCleaningN", "isCleaningS", "lightNorth", 
-			"lightSouth", "garbageTruckNorth_location", "garbageTruckSouth_location" };
+	private static String[] sysVars = new String[] { "isCleaningN", "isCleaningS", "lightNorth", "lightSouth",
+			"garbageTruckNorth_location", "garbageTruckSouth_location" };
 
-	private static String input;
+	private static String input = "";
 
 	public static void main(String args[]) throws IOException, ClassNotFoundException {
 		server = new ServerSocket(port);
-		mocker();
 
 		colorMe(messageTypes.INFO, creatingSpectraObject, true);
-//		sim = new NeighberhoodSimulator();
+		sim = new NeighberhoodSimulator();
 		colorMe(messageTypes.SUCCESS, spectraObjectCreated, true);
 
 		while (true) {
@@ -69,24 +66,21 @@ public class SocketServer {
 
 			InputStream ois = socket.getInputStream();
 			HashMap<String, Object> dataDict = inputStreamToDict(ois);
-			
+
 			StringTokenizer parse = new StringTokenizer(input);
 			String method = parse.nextToken().toUpperCase(); // we get the HTTP method of the client
 			String path = parse.nextToken().toLowerCase(); // we get file requested
 
-
-			if (method.equals("GET"))
-				// Used only for creating new session.
-				newConnectionFound(socket, parse);
-			else {
-				if ((Boolean)dataDict.get("data_exists") == true) {
-					createAndSendResponseToClient(socket, systemVarsToJson().toString(), (Boolean)dataDict.get("isClientChrome"));
-				} else {
-					// this is just for mocking
-					// createAndSendResponseToClient(socket, systemVarsToJson().toString());
-					createAndSendResponseToClient(socket, "Hello new user", (Boolean)dataDict.get("isClientChrome"));
-				}
-			}
+			if (path.contains("api")) {
+				if ((Boolean) dataDict.get("data_exists") == true)
+					// TODO: process and send env vars to spectra.
+					input = "";
+				createAndSendResponseToClient(socket, spectraVarsToJson().toString(),
+						(Boolean) dataDict.get("isClientChrome"));
+			} else if (path.contains("scenario")) {
+				// TODO: handle scenarios.
+			} else
+				newConnectionFound(socket, parse, path);
 
 			ois.close();
 			socket.close();
@@ -96,23 +90,88 @@ public class SocketServer {
 			if ("".contains("1"))
 				break;
 		}
+
 		colorMe(messageTypes.INFO, shutdownMessage, true);
 		server.close();
 	}
+	
+	/*********************************************************************************/
+	/* Generic functions */
+	/*********************************************************************************/
 
-	private static void newConnectionFound(Socket socket, StringTokenizer parse) throws IOException {
-		if (path.endsWith("/")) {
-			path += DEFAULT_FILE;
+	public static HashMap<String, Object> inputStreamToDict(InputStream ois) {
+		byte[] messageByte = new byte[10000];
+		int bytesRead = 0;
+
+		try {
+			DataInputStream in = new DataInputStream(ois);
+			bytesRead = in.read(messageByte);
+		} catch (IOException e) {
+			colorMe(messageTypes.ERROR, inputError, true);
+			return null;
 		}
+
+		input = new String(messageByte, 0, bytesRead);
+
+		JSONObject data = parseInputToDataJsonObject(input);
+		HashMap<String, Object> dataDict = new HashMap<>();
+
+		if (data != null) {
+			dataDict = parseDataToEnvVars(data);
+			dataDict.put("data_exists", true);
+			colorMe(messageTypes.INFO, dataReceivingMessage + dataDict.toString(), false);
+		} else {
+			dataDict.put("data_exists", false);
+
+			colorMe(messageTypes.ERROR, noDataPayloadMessage, false);
+		}
+
+		if (input.toLowerCase().contains("chrome"))
+			dataDict.put("isClientChrome", true);
+		else
+			dataDict.put("isClientChrome", false);
+
+		return dataDict;
+	}
+	
+	private static void colorMe(messageTypes type, String pleasePaintMe, boolean isHeader) {
+		if (isHeader)
+			pleasePaintMe = headerPrefixSuffix + pleasePaintMe + headerPrefixSuffix;
+
+		switch (type) {
+		case ERROR:
+			System.out.println(ConsoleColors.RED_BRIGHT + pleasePaintMe + ConsoleColors.RESET);
+			break;
+		case SUCCESS:
+			System.out.println(ConsoleColors.GREEN_BRIGHT + pleasePaintMe + ConsoleColors.RESET);
+			break;
+		case INFO:
+			System.out.println(ConsoleColors.CYAN_BRIGHT + pleasePaintMe + ConsoleColors.RESET);
+			break;
+		case WAITING:
+			System.out.println(ConsoleColors.PURPLE_BRIGHT + pleasePaintMe + ConsoleColors.RESET);
+			break;
+		}
+	}
+
+	/*********************************************************************************/
+	/* New connection functions */
+	/*******************************************************************************/
+	
+	private static void newConnectionFound(Socket socket, StringTokenizer parse, String path) throws IOException {
+		if (path.endsWith("/"))
+			path += DEFAULT_FILE;
 		File file = new File(WEB_ROOT, path);
 		int fileLength = (int) file.length();
 		String content = getContentType(path);
+		PrintWriter out = null;
+		BufferedOutputStream dataOut = null;
 
 		byte[] fileData = readFileData(file, fileLength);
 
-		PrintWriter out = new PrintWriter(socket.getOutputStream());
+		out = new PrintWriter(socket.getOutputStream());
 		// get binary output stream to client (for requested data)
-		BufferedOutputStream dataOut = new BufferedOutputStream(socket.getOutputStream());
+		dataOut = new BufferedOutputStream(socket.getOutputStream());
 		// send HTTP Headers
 		out.println("HTTP/1.1 200 OK");
 		out.println("Server: Java HTTP Server from SSaurel : 1.0");
@@ -152,45 +211,11 @@ public class SocketServer {
 			return "text/plain";
 	}
 
-	public static HashMap<String, Object> inputStreamToDict(InputStream ois) {
-		byte[] messageByte = new byte[10000];
-		String inputString = "";
-		int bytesRead = 0;
-
-		try {
-			DataInputStream in = new DataInputStream(ois);
-			bytesRead = in.read(messageByte);
-		} catch (IOException e) {
-			colorMe(messageTypes.ERROR, inputError, true);
-			return null;
-		}
-
-		inputString = new String(messageByte, 0, bytesRead);
-
-		JSONObject data = parseinputToDataJsonObject(inputString);
-		HashMap<String, Object> dataDict = new HashMap<>();
-
-		input = inputString;
-
-		if (data != null) {
-			dataDict = parseDataToEnvVars(data);
-			dataDict.put("data_exists", true);
-			colorMe(messageTypes.INFO, dataReceivingMessage + dataDict.toString(), false);
-		} else {
-			dataDict.put("data_exists", false);
-
-			colorMe(messageTypes.ERROR, noDataPayloadMessage, false);
-		}
-
-		if (inputString.toLowerCase().contains("chrome"))
-			dataDict.put("isClientChrome", true);
-		else
-			dataDict.put("isClientChrome", false);
-
-		return dataDict;
-	}
-
-	private static JSONObject parseinputToDataJsonObject(String input) {
+	/*********************************************************************************/
+	/* Next state functions */
+	/*********************************************************************************/
+	
+	private static JSONObject parseInputToDataJsonObject(String input) {
 		JSONObject js = null;
 		String[] splitData = input.split("\n");
 
@@ -222,11 +247,15 @@ public class SocketServer {
 		}
 	}
 
-	private static JSONObject systemVarsToJson() {
-		int temp = (mocker_pos++ + 1) % 7;
-		HashMap<String, Object> sysVars = mock_list.get(temp);
+	private static JSONObject spectraVarsToJson() {
+		HashMap<String, HashMap<String, Object>> spectraVars = sim.getNextState(0);
 		try {
-			return new JSONObject(sysVars.toString());
+			JSONObject varsResponse = new JSONObject();
+			varsResponse.put("houseCount", houseCount);
+			varsResponse.put("system", new JSONObject(spectraVars.get("system").toString()));
+			varsResponse.put("environment", new JSONObject(spectraVars.get("environment").toString()));
+
+			return varsResponse;
 		} catch (JSONException e) {
 			return null;
 		}
@@ -239,11 +268,12 @@ public class SocketServer {
 			try {
 				Object varValue = data.get(envVar);
 				if (envVar == "garbageCansNorth" || envVar == "garbageCansSouth") {
-					/*JSONArray subData = (JSONArray) varValue;
-
-					for (Integer i = 0; i < houseCount; i++) {
-						envVarsValues.put(envVar + i.toString(), Boolean.parseBoolean(subData.get(i).toString()));
-					}*/
+					/*
+					 * JSONArray subData = (JSONArray) varValue;
+					 * 
+					 * for (Integer i = 0; i < houseCount; i++) { envVarsValues.put(envVar +
+					 * i.toString(), Boolean.parseBoolean(subData.get(i).toString())); }
+					 */
 					envVarsValues.put(envVar, (Boolean[]) varValue);
 				} else {
 					envVarsValues.put(envVar, (Boolean) varValue);
@@ -260,93 +290,5 @@ public class SocketServer {
 		}
 
 		return envVarsValues;
-	}
-
-	private static void colorMe(messageTypes type, String pleasePaintMe, boolean isHeader) {
-		if (isHeader)
-			pleasePaintMe = headerPrefixSuffix + pleasePaintMe + headerPrefixSuffix;
-
-		switch (type) {
-		case ERROR:
-			System.out.println(ConsoleColors.RED_BRIGHT + pleasePaintMe + ConsoleColors.RESET);
-			break;
-		case SUCCESS:
-			System.out.println(ConsoleColors.GREEN_BRIGHT + pleasePaintMe + ConsoleColors.RESET);
-			break;
-		case INFO:
-			System.out.println(ConsoleColors.CYAN_BRIGHT + pleasePaintMe + ConsoleColors.RESET);
-			break;
-		case WAITING:
-			System.out.println(ConsoleColors.PURPLE_BRIGHT + pleasePaintMe + ConsoleColors.RESET);
-			break;
-		}
-	}
-
-	private static List<HashMap<String, Object>> mock_list = new ArrayList<HashMap<String, Object>>();
-	private static int mocker_pos = 0;
-
-	private static void mocker() {
-		HashMap<String, Object> mock = new HashMap<>();
-		mock.put("isCleaningN", false);
-		mock.put("isCleaningS", false);
-		mock.put("lightNorth", true);
-		mock.put("lightSouth", false);
-		mock.put("garbageTruckNorth_location", 0);
-		mock.put("garbageTruckSouth_location", 3);
-		mock_list.add(mock);
-
-		mock = new HashMap<>();
-		mock.put("isCleaningN", false);
-		mock.put("isCleaningS", false);
-		mock.put("lightNorth", true);
-		mock.put("lightSouth", true);
-		mock.put("garbageTruckNorth_location", 1);
-		mock.put("garbageTruckSouth_location", 2);
-		mock_list.add(mock);
-
-		mock = new HashMap<>();
-		mock.put("isCleaningN", true);
-		mock.put("isCleaningS", false);
-		mock.put("lightNorth", true);
-		mock.put("lightSouth", false);
-		mock.put("garbageTruckNorth_location", 1);
-		mock.put("garbageTruckSouth_location", 1);
-		mock_list.add(mock);
-
-		mock = new HashMap<>();
-		mock.put("isCleaningN", false);
-		mock.put("isCleaningS", true);
-		mock.put("lightNorth", true);
-		mock.put("lightSouth", true);
-		mock.put("garbageTruckNorth_location", 2);
-		mock.put("garbageTruckSouth_location", 1);
-		mock_list.add(mock);
-
-		mock = new HashMap<>();
-		mock.put("isCleaningN", false);
-		mock.put("isCleaningS", false);
-		mock.put("lightNorth", true);
-		mock.put("lightSouth", false);
-		mock.put("garbageTruckNorth_location", 3);
-		mock.put("garbageTruckSouth_location", 0);
-		mock_list.add(mock);
-
-		mock = new HashMap<>();
-		mock.put("isCleaningN", false);
-		mock.put("isCleaningS", true);
-		mock.put("lightNorth", true);
-		mock.put("lightSouth", true);
-		mock.put("garbageTruckNorth_location", 4);
-		mock.put("garbageTruckSouth_location", 0);
-		mock_list.add(mock);
-
-		mock = new HashMap<>();
-		mock.put("isCleaningN", false);
-		mock.put("isCleaningS", false);
-		mock.put("lightNorth", true);
-		mock.put("lightSouth", false);
-		mock.put("garbageTruckNorth_location", 4);
-		mock.put("garbageTruckSouth_location", -1);
-		mock_list.add(mock);
 	}
 }
