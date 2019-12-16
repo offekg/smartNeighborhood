@@ -1,10 +1,6 @@
 package src;
 
-import java.util.Queue;
 import java.util.Random;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.JComponent;
 
@@ -40,12 +36,12 @@ public class NeighberhoodSimulator extends JComponent {
 
 	int sim_itter = 0;
 
-	ReentrantLock output_queue_lock = new ReentrantLock();
+	/*ReentrantLock output_queue_lock = new ReentrantLock();
 	Queue<HashMap<String, HashMap<String, Object>>> output_next_states = new LinkedList<>();
 	HashMap<String, HashMap<String, Object>> last_state_sent = new HashMap<>();
 	
 	ReentrantLock input_queue_lock = new ReentrantLock();
-	Queue<HashMap<String, Object>> input_next_states = new LinkedList<>();
+	Queue<HashMap<String, Object>> input_next_states = new LinkedList<>();*/
 
 	public NeighberhoodSimulator() {
 
@@ -106,8 +102,6 @@ public class NeighberhoodSimulator extends JComponent {
 
 				executor.updateState(true, true);
 
-				add_current_state_to_outputs_states_queue();
-
 			} catch (ControllerExecutorException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -118,7 +112,7 @@ public class NeighberhoodSimulator extends JComponent {
 		// }
 	}
 
-	private void add_current_state_to_outputs_states_queue() {
+	/*private void add_current_state_to_outputs_states_queue() {
 		HashMap<String, Object> current_environment_state = new HashMap<>();
 		current_environment_state.put("sidewalkNorth", sidewalkNorth);
 		current_environment_state.put("sidewalkSouth", sidewalkSouth);
@@ -177,5 +171,5 @@ public class NeighberhoodSimulator extends JComponent {
 		/*
 		 * TODO: Need to do the updates here
 		 */
-	}
+	//}
 }
