@@ -17,14 +17,18 @@ public class NeighberhoodSimulator extends JComponent {
 
 	/***** Environment variables *****/
 	int N = 4;
-	boolean sidewalkNorth;
-	boolean sidewalkSouth;
-	boolean crossingCrosswalkNS;
+	boolean sidewalkNorth = false;
+	boolean sidewalkSouth = false;
+	boolean crossingCrosswalkNS = fasle;
 	// boolean crossingCrosswalkSN;
 	boolean[] garbageCansNorth = new boolean[N];
+	for (int i = 0; i < N; i++)
+		garbageCansNorth[i] = false;
+	
 	// boolean[N] garbageCansSouth;
 	/*-------------------------------*/
 
+	
 	/***** System variables *****/
 	boolean isCleaningN;
 	// boolean isCleaningS;
@@ -48,71 +52,85 @@ public class NeighberhoodSimulator extends JComponent {
 		// Instantiate a new controller executor
 		executor = new ControllerExecutor(true, true);
 		Random random = new Random();
+		
+		for (int i = 0; i < N; i++)
+			executor.setInputValue(String.format("garbageCansNorth[%d]", i),
+					String.valueOf(garbageCansNorth[i]));
+		executor.setInputValue("sidewalkSouth", String.valueOf(sidewalkSouth));
+		executor.setInputValue("sidewalkNorth", String.valueOf(sidewalkNorth));
+		executor.setInputValue("crossingCrosswalkNS", String.valueOf(crossingCrosswalkNS));
+		
+		executor.updateState(true, true);
+		
+		isCleaningN = Boolean.parseBoolean(executor.getCurValue("isCleaning"));
+		lightNorth = Boolean.parseBoolean(executor.getCurValue("lightNorth"));
+		lightSouth = Boolean.parseBoolean(executor.getCurValue("lightSouth"));
+		garbageTruckNorth_location = Integer.parseInt(executor.getCurValue("garbageTruckNorth_location"));
+		
+	}
+	
+	public HashMap<String, HashMap<String, Object>> get_next_state(int scenario_num){
+		isCleaningN = Boolean.parseBoolean(executor.getCurValue("isCleaning"));
+		lightNorth = Boolean.parseBoolean(executor.getCurValue("lightNorth"));
+		lightSouth = Boolean.parseBoolean(executor.getCurValue("lightSouth"));
+		garbageTruckNorth_location = Integer.parseInt(executor.getCurValue("garbageTruckNorth_location"));
+		
+		switch (scenario_num) {
+		case 0:  //random scenario
+			random_next_state();
+			break;
+		case 1:
+			break;
+		}
+		
+		//update 
+		for (int i = 0; i < N; i++)
+			executor.setInputValue(String.format("garbageCansNorth[%d]", i),
+					String.valueOf(garbageCansNorth[i]));
+		executor.setInputValue("sidewalkSouth", String.valueOf(sidewalkSouth));
+		executor.setInputValue("sidewalkNorth", String.valueOf(sidewalkNorth));
+		executor.setInputValue("crossingCrosswalkNS", String.valueOf(crossingCrosswalkNS));
 
-		while (true) {
-
-			try {
-				// executor.updateState(true, true);
-				isCleaningN = Boolean.parseBoolean(executor.getCurValue("isCleaning"));
-				lightNorth = Boolean.parseBoolean(executor.getCurValue("lightNorth"));
-				lightSouth = Boolean.parseBoolean(executor.getCurValue("lightSouth"));
-				garbageTruckNorth_location = Integer.parseInt(executor.getCurValue("garbageTruckNorth_location"));
-
-				if (sim_itter == 0) {
-					for (int i = 0; i < N; i++)
-						garbageCansNorth[i] = false;
-					sidewalkNorth = false;
-					sidewalkSouth = false;
-					crossingCrosswalkNS = false;
-
-				} else {
-					for (int i = 0; i < N; i++) {
-						if (garbageCansNorth[i] == true && garbageCansNorth[i] && isCleaningN)
-							garbageCansNorth[i] = false;
-						else {
-							if (random.nextInt(5) == 0) // 1:5 chance of trash can becoming full
-								garbageCansNorth[i] = true;
-							else
-								garbageCansNorth[i] = false;
-						}
-					}
-
-					if (crossingCrosswalkNS || random.nextInt(5) == 0) // 1:5 chance of pedestrian on south sidewalk
-						sidewalkSouth = true;
-					else
-						sidewalkSouth = false;
-
-					if (sidewalkNorth == true)
-						crossingCrosswalkNS = true;
-					else
-						crossingCrosswalkNS = false;
-
-					if (random.nextInt(4) == 0) // 1:4 chance of pedestrian on north sidewalk
-						sidewalkNorth = true;
-					else
-						sidewalkNorth = false;
-
-				}
-				for (int i = 0; i < N; i++)
-					executor.setInputValue(String.format("garbageCansNorth[%d]", i),
-							String.valueOf(garbageCansNorth[i]));
-				executor.setInputValue("sidewalkSouth", String.valueOf(sidewalkSouth));
-				executor.setInputValue("sidewalkNorth", String.valueOf(sidewalkNorth));
-				executor.setInputValue("crossingCrosswalkNS", String.valueOf(crossingCrosswalkNS));
-
-				executor.updateState(true, true);
-
-			} catch (ControllerExecutorException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		executor.updateState(true, true);
+		
+		isCleaningN = Boolean.parseBoolean(executor.getCurValue("isCleaning"));
+		lightNorth = Boolean.parseBoolean(executor.getCurValue("lightNorth"));
+		lightSouth = Boolean.parseBoolean(executor.getCurValue("lightSouth"));
+		garbageTruckNorth_location = Integer.parseInt(executor.getCurValue("garbageTruckNorth_location"));
+		
+		return add_current_state_to_outputs_states_queue();
+	}
+	
+	public void random_next_state() {
+		for (int i = 0; i < N; i++) {
+			if (garbageCansNorth[i] == true && garbageCansNorth[i] && isCleaningN)
+				garbageCansNorth[i] = false;
+			else {
+				if (random.nextInt(5) == 0) // 1:5 chance of trash can becoming full
+					garbageCansNorth[i] = true;
+				else
+					garbageCansNorth[i] = false;
 			}
-			sim_itter += 1;
 		}
 
-		// }
+		if (crossingCrosswalkNS || random.nextInt(5) == 0) // 1:5 chance of pedestrian on south sidewalk
+			sidewalkSouth = true;
+		else
+			sidewalkSouth = false;
+
+		if (sidewalkNorth == true)
+			crossingCrosswalkNS = true;
+		else
+			crossingCrosswalkNS = false;
+
+		if (random.nextInt(4) == 0) // 1:4 chance of pedestrian on north sidewalk
+			sidewalkNorth = true;
+		else
+			sidewalkNorth = false;
+		
 	}
 
-	/*private void add_current_state_to_outputs_states_queue() {
+	private void add_current_state_to_outputs_states_queue() {
 		HashMap<String, Object> current_environment_state = new HashMap<>();
 		current_environment_state.put("sidewalkNorth", sidewalkNorth);
 		current_environment_state.put("sidewalkSouth", sidewalkSouth);
@@ -133,11 +151,10 @@ public class NeighberhoodSimulator extends JComponent {
 		current_full_state.put("environment", current_environment_state);
 		current_full_state.put("system", current_system_state);
 
-		output_queue_lock.lock();
-		output_next_states.add(current_full_state);
-		output_queue_lock.unlock();
+		
+		return current_full_state;
 	}
-	
+	/*
 	public HashMap<String, HashMap<String, Object>> get_output_next_state() {
 		output_queue_lock.lock();
 		
