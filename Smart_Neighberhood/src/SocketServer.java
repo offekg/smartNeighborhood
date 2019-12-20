@@ -235,9 +235,9 @@ public class SocketServer {
 	private static void createAndSendResponseToClient(Socket socket, String content, boolean isChrome) {
 		String response = "";
 		if (isChrome) {
-			response = "HTTP/1.1 200 OK\r\n" + "Content-Type: application/json\r\n\r\n" + "data: " + content;
+			response = "HTTP/1.1 200 OK\r\n" + "Content-Type: application/json\r\n\r\n" + content;
 		} else
-			response = "data: " + content;
+			response = content;
 
 		try (OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)) {
 			out.write(response);

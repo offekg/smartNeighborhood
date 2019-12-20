@@ -6,7 +6,7 @@ let isNextUpdated;
 let states;
 const numStates = 8;
 
-const animationTime = 96;
+const animationTime = 120;
 
 let opacity = 0;
 const lightC = "#fff200";
@@ -72,8 +72,14 @@ function getNextState() {
   let xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-     console.log(JSON.parse(this.responseText));
+     console.log(this.responseText);
+     // console.log(JSON.parse(this.responseText));
      nextState = JSON.parse(this.responseText);
+     // TODO: remove once API is complete.
+     nextState.environment.garbageCansSouth = nextState.environment.garbageCansNorth;
+     nextState.environment.isNight = false;
+     nextState.environment.lightSouth = nextState.environment.lightNorth;
+     nextState.system.garbageTruckSouth_location = 4;
      isNextUpdated = true;
      waitingResponse = false;
      if (stateIndex == 0) {
@@ -84,7 +90,7 @@ function getNextState() {
      }
     }
   };
-  xhttp.open("GET", "/states/" + stateIndex + ".json", true);
+  xhttp.open("GET", "/api", true);
   xhttp.send();
 }
 
@@ -92,8 +98,10 @@ function animate() {
   paintBackground();
   paintStreetLamps(false);
   let animatingTop = animateTopTruck();
-  let animatingBottom = animateBottomTruck();
-  let animatingPerson = animatePerson();
+  // let animatingBottom = animateBottomTruck();
+  let animatingBottom = false;
+  // let animatingPerson = animatePerson();
+  let animatingPerson = false;
   if (!animatingPerson && !animatingTop && !animatingBottom && stateIndex < numStates) {
     if (isNextUpdated) {
       currentState = nextState;
@@ -113,15 +121,15 @@ function animate() {
 function animateTopTruck() {
   let animating = false;
   ctx.drawImage(truckImg, topTruckX, topTruckY, truckH * truckImageRatio, truckH);
-  if (topTruckX < block * currentState.truckTop + block / 4) {
+  if (topTruckX < block * currentState.system.garbageTruckNorth_location + block / 4) {
     topTruckX += block / animationTime;
     animating = true;
   }
-  if (currentState.topIsCleaning && topTruckY > initTopTruckY - 30){
+  if (currentState.system.isCleaningN && topTruckY > initTopTruckY - 30){
     topTruckY -= 1;
     animating = true;
   }
-  if (!currentState.topIsCleaning && topTruckY < initTopTruckY){
+  if (!currentState.system.isCleaningN && topTruckY < initTopTruckY){
     topTruckY += 1;
     animating = true;
   }
@@ -131,15 +139,15 @@ function animateTopTruck() {
 function animateBottomTruck(){
   let animating = false;
   ctx.drawImage(truckRevImg, bottomTruckX, bottomTruckY, truckH * truckImageRatio, truckH);
-  if (bottomTruckX > block * currentState.truckBottom + block / 4){
+  if (bottomTruckX > block * currentState.system.garbageTruckSouth_location + block / 4){
     bottomTruckX -= block / animationTime;
     animating = true;
   }
-  if (currentState.bottomIsCleaning && bottomTruckY < initBottomTruckY + 30) {
+  if (currentState.system.isCleaningS && bottomTruckY < initBottomTruckY + 30) {
     bottomTruckY += 1;
     animating = true;
   }
-  if (!currentState.bottomIsCleaning && bottomTruckY > initBottomTruckY) {
+  if (!currentState.system.isCleaningS && bottomTruckY > initBottomTruckY) {
     bottomTruckY -= 1;
     animating = true;
   }
@@ -149,15 +157,15 @@ function animateBottomTruck(){
 function animatePerson(){
   let animating = false;
   ctx.drawImage(personImg, personX, personY, personW, personH);
-  if (currentState.personTop && personX < (canvasW / 2) - (personW / 2)){
+  if (currentState.environment.sidewalkNorth && personX < (canvasW / 2) - (personW / 2)){
     personX += (canvasW / 2 + personW / 2) / animationTime;
     animating = true;
   }
-  if (currentState.personCrossing && personY < finalBottomPersonY) {
+  if (currentState.environment.crossingCrosswalkNS && personY < finalBottomPersonY) {
     personY += roadH / animationTime;
     animating = true;
   }
-  if (currentState.personBottom && personX < finalBottomPersonX) {
+  if (currentState.environment.sidewalkSouth && personX < finalBottomPersonX) {
     personX += (canvasW / 2 + personW / 2) / animationTime;
     animating = true;
   }
@@ -177,10 +185,10 @@ function paintBackground(){
 }
 
 function paintNight() {
-  if (currentState.isNight  && opacity < 0.5) {
+  if (currentState.environment.isNight  && opacity < 0.5) {
     opacity += 0.5 / animationTime;
   }
-  if (!currentState.isNight  && opacity > 0) {
+  if (!currentState.environment.isNight  && opacity > 0) {
     opacity -= 0.4 / animationTime;
   }
   if (opacity > 0) {
@@ -234,7 +242,7 @@ function paintStreetLamp(left, top, width, height, isBottom) {
   ctx.arc(left, top + height * 0.1, width / 2, Math.PI, 0);
   ctx.fill();
   ctx.fillRect(left -  lampW / 2, top + 5, lampW , height * 0.9);
-  let isOn = isBottom ? currentState.lightBottm : currentState.lightTop;
+  let isOn = isBottom ? currentState.system.lightSouth : currentState.system.lightNorth;
   if (isOn) {
     ctx.fillStyle = "yellow";
     ctx.globalAlpha = 0.7;
@@ -269,7 +277,8 @@ function paintHouse(index, isBottom, left, top, width, height) {
   const trashH = height / 4;
   const trashOffset = 12;
   ctx.fillRect(left + width + trashOffset - 1, top + height  - trashCanH, trashCanW, trashCanH);
-  let hasGarbage = isBottom ? currentState.garbageBottom[index] : currentState.garbageTop[index];
+  let hasGarbage = isBottom ? currentState.environment.garbageCansSouth[index] :
+                              currentState.environment.garbageCansNorth[index];
   if (hasGarbage) {
     ctx.fillStyle = trashC;
     ctx.beginPath();
