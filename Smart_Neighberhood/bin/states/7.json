@@ -1,0 +1,25 @@
+{
+  "numHouses": 4,
+  "garbageTop": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "garbageBottom": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "lightTop": true,
+  "lightBottm": false,
+  "personTop": false,
+  "personCrossing": false,
+  "personBottom": false,
+  "truckTop": 4,
+  "truckBottom": -1,
+  "topIsCleaning": false,
+  "bottomIsCleaning": false,
+  "isNight": false
+}

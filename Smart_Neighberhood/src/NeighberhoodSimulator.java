@@ -101,7 +101,7 @@ public class NeighberhoodSimulator extends JComponent {
 
 	public void randomNextState() {
 		for (int i = 0; i < N; i++) {
-			if (garbageCansNorth[i] == true && garbageCansNorth[i] && isCleaningN)
+			if (garbageCansNorth[i] == true && garbageTruckNorth_location == i && isCleaningN)
 				garbageCansNorth[i] = false;
 			else {
 				if (random.nextInt(5) == 0) // 1:5 chance of trash can becoming full

@@ -78,6 +78,11 @@ gar G (crossing & (garbageTruckNorth_location = crosswalkLoc)) ->
 //gar G (crossing & garbageTruckSouth_location = crosswalkLoc) ->
 //   next(garbageTruckSouth_location = crosswalkLoc); 
 
+//Truck doesn't clean, if not at a full can
+//define truckNAtFullCan := garbageCansNorth[i] & (garbageTruckNorth_location = i)
+
+//gar GF (forall i in Int(0..(N-1)). (garbageCansNorth[i] & (garbageTruckNorth_location = i)
+
 //Eventually always, the truck will come to clean all full cans.
 predicate isCleaningGarbage(Int(0..(3)) i):
 	(garbageCansNorth[i] & (garbageTruckNorth_location = i) & isCleaningN);
