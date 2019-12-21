@@ -105,7 +105,7 @@ public class NeighberhoodSimulator extends JComponent {
 		executor.setInputValue("sidewalkNorth", String.valueOf(sidewalkNorth));
 		executor.setInputValue("crossingCrosswalkNS", String.valueOf(crossingCrosswalkNS));
 
-		executor.updateState(true, false); // TODO: I changed it to false due to many errors it gave me, check what is
+		executor.updateState(true, true); // TODO: I changed it to false due to many errors it gave me, check what is
 											// right
 	}
 

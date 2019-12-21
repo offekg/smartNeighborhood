@@ -24,7 +24,7 @@ sys Int(0..N) garbageTruckSouth_location;
 //all pedestrian areas start empty
 asm !sidewalkNorth & !sidewalkSouth & !crossingCrosswalkNS; //& !crossingCrosswalkSN;
 asm all_cans_start_empty:
-	forall i in Int(0..(N-1)). (!garbageCansNorth[i]);// & !garbageCansSouth[i]);
+	forall i in Int(0..(N-1)). ((!garbageCansNorth[i]) & !garbageCansSouth[i]);
 
 
 
@@ -73,8 +73,8 @@ define crossing := crossingCrosswalkNS; //| crossingCrosswalkSN;
 gar !lightNorth & !lightSouth;
 gar garbageTruckNorth_location = N;
 gar garbageTruckSouth_location = N;
-//gar !isCleaningN;
-//gar !isCleaningS;
+gar !isCleaningN;
+gar !isCleaningS;
 
 //***truck Guarantees***
 //If truck is before crosswalk, and someone is crossing, then it won't move
@@ -83,16 +83,51 @@ gar G (crossing & (garbageTruckNorth_location = crosswalkLoc)) ->
 gar G (crossing & garbageTruckSouth_location = crosswalkLoc) ->
    next(garbageTruckSouth_location = crosswalkLoc); 
 
+//If truck at full can, stays there to clean next turn
+predicate truckAtFullCanWillCleanNorth(Int(0..(3)) i):
+	(garbageCansNorth[i] & (garbageTruckNorth_location = i) & !isCleaningN) -> (next(isCleaningN) & (next(garbageTruckNorth_location) = i));
+
+gar G truckAtFullCanWillCleanNorth(0);
+gar G truckAtFullCanWillCleanNorth(1);
+gar G truckAtFullCanWillCleanNorth(2);
+gar G truckAtFullCanWillCleanNorth(3);
+
+predicate truckAtFullCanWillCleanSouth(Int(0..(3)) i):
+	(garbageCansSouth[i] & (garbageTruckSouth_location = i) & !isCleaningS) -> (next(isCleaningS) & (next(garbageTruckSouth_location) = i));
+
+gar G truckAtFullCanWillCleanSouth(0);
+gar G truckAtFullCanWillCleanSouth(1);
+gar G truckAtFullCanWillCleanSouth(2);
+gar G truckAtFullCanWillCleanSouth(3);
+
+	
+//If truck is currently cleaning a full can, next state it won't be cleaning and can will be empty.
+predicate truckCleaningWillStopNorth(Int(0..(3)) i):
+	((garbageCansNorth[i] & (garbageTruckNorth_location = i) & isCleaningN)) -> 
+										(next(!isCleaningN) & next(!garbageCansNorth[i]));
+gar G truckCleaningWillStopNorth(0);
+gar G truckCleaningWillStopNorth(1);
+gar G truckCleaningWillStopNorth(2);
+gar G truckCleaningWillStopNorth(3);
+
+predicate truckCleaningWillStopSouth(Int(0..(3)) i):
+	((garbageCansSouth[i] & (garbageTruckSouth_location = i) & isCleaningS)) -> 
+										(next(!isCleaningS) & next(!garbageCansSouth[i]));
+gar G truckCleaningWillStopSouth(0);
+gar G truckCleaningWillStopSouth(1);
+gar G truckCleaningWillStopSouth(2);
+gar G truckCleaningWillStopSouth(3);
+
+
 //If truck is cleaning, next turn it doesn't move and isn't cleaning 
-gar G forall i in Int(0..(N-1)). ((garbageTruckNorth_location = i) & garbageCansNorth[i] & isCleaningN) -> next(garbageTruckNorth_location = i & !isCleaningN);
-gar G forall i in Int(0..(N-1)). ((garbageTruckSouth_location = i) & garbageCansSouth[i] & isCleaningS) -> next(garbageTruckSouth_location = i & !isCleaningS);
+//gar G (forall i in Int(0..(N-1)). ((garbageTruckNorth_location = i) & garbageCansNorth[i] & isCleaningN)) -> next(garbageTruckNorth_location = i & !isCleaningN);
+//gar G (forall i in Int(0..(N-1)). ((garbageTruckSouth_location = i) & garbageCansSouth[i] & isCleaningS)) -> next(garbageTruckSouth_location = i & !isCleaningS);
 
 
-//Truck doesn't clean, if not at a full can
-//define truckNAtFullCan := garbageCansNorth[i] & (garbageTruckNorth_location = i)
-//gar GF (forall i in Int(0..(N-1)). (!(garbageCansNorth[i] & garbageTruckNorth_location = i))) -> !isCleaningN;
-//gar G (isCleaningN & (exists i in Int(0..(N-1)). (garbageCansNorth[i] = true & garbageTruckNorth_location = i)));
-//gar G isCleaningN = true;
+//Truck cleaning means it's at a full can
+gar G (isCleaningN -> (exists i in Int(0..(N-1)). (garbageCansNorth[i] = true & garbageTruckNorth_location = i)));
+gar G (isCleaningS -> (exists i in Int(0..(N-1)). (garbageCansSouth[i] = true & garbageTruckSouth_location = i)));
+
 
 //Eventually always, the truck will come to clean all full cans.
 predicate isCleaningGarbageNorth(Int(0..(3)) i):
