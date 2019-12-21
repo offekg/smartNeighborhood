@@ -11,22 +11,24 @@ import tau.smlab.syntech.executor.ControllerExecutorException;
 
 public class NeighberhoodSimulator extends JComponent {
 
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+
 	ControllerExecutor executor;
 	Random random = new Random();
 
 	/***** Environment variables *****/
 	int N = 4;
-	boolean sidewalkNorth = false;
-	boolean sidewalkSouth = false;
-	boolean crossingCrosswalkNS = false;
+	boolean sidewalkNorth;
+	boolean sidewalkSouth;
+	boolean crossingCrosswalkNS;
 	// boolean crossingCrosswalkSN;
 	boolean[] garbageCansNorth = new boolean[N];
 	boolean[] garbageCansSouth = new boolean[N];
-	
+
 	/*-------------------------------*/
 
 	/***** System variables *****/
@@ -38,22 +40,14 @@ public class NeighberhoodSimulator extends JComponent {
 	int garbageTruckSouth_location;
 	/*-------------------------------*/
 
-	int sim_itter = 0;
+	int sim_itter;
 
 	public NeighberhoodSimulator() {
-
-		// Instantiate a new controller executor
-		executor = new ControllerExecutor(true, false);
-
-		for (int i = 0; i < N; i++) {
-			garbageCansNorth[i] = false;
-			garbageCansSouth[i] = false;
-		}
-			
+		setEnvVarsToDefault();
 
 		try {
 			updateEnvVarsInSpectra();
-			
+
 			updateSystemVarsFromSpectra();
 		} catch (ControllerExecutorException e) {
 			// TODO: handle it gracefully.
@@ -63,13 +57,16 @@ public class NeighberhoodSimulator extends JComponent {
 
 	public HashMap<String, HashMap<String, Object>> getNextState(int scenario_num) {
 		switch (scenario_num) {
+		case -1:
+			setEnvVarsToDefault();
+			break;
 		case 0: // random scenario
 			randomNextState();
 			break;
 		case 1:
 			break;
 		}
-		
+
 		try {
 			updateEnvVarsInSpectra();
 			updateSystemVarsFromSpectra();
@@ -81,10 +78,25 @@ public class NeighberhoodSimulator extends JComponent {
 
 		return getSpectraVarsAsDict();
 	}
+	
+	public void setEnvVarsToDefault() {
+		// Instantiate a new controller executor
+		executor = new ControllerExecutor(true, false);
+		
+		sidewalkNorth = false;
+		sidewalkSouth = false;
+		crossingCrosswalkNS = false;
+		// crossingCrosswalkSN;
+		for (int i = 0; i < N; i++) {
+			garbageCansNorth[i] = false;
+			garbageCansSouth[i] = false;
+		}
+		sim_itter = 0;
+	}
 
 	private void updateEnvVarsInSpectra() throws ControllerExecutorException {
 		System.out.println("Updating environment variables in Spectra");
-		
+
 		for (int i = 0; i < N; i++) {
 			executor.setInputValue(String.format("garbageCansNorth[%d]", i), String.valueOf(garbageCansNorth[i]));
 			executor.setInputValue(String.format("garbageCansSouth[%d]", i), String.valueOf(garbageCansSouth[i]));
@@ -93,12 +105,13 @@ public class NeighberhoodSimulator extends JComponent {
 		executor.setInputValue("sidewalkNorth", String.valueOf(sidewalkNorth));
 		executor.setInputValue("crossingCrosswalkNS", String.valueOf(crossingCrosswalkNS));
 
-		executor.updateState(true, false); // TODO: I changed it to false due to many errors it gave me, check what is right
+		executor.updateState(true, false); // TODO: I changed it to false due to many errors it gave me, check what is
+											// right
 	}
 
 	private void updateSystemVarsFromSpectra() throws ControllerExecutorException {
 		System.out.println("Getting system variables from Spectra");
-		
+
 		isCleaningN = Boolean.parseBoolean(executor.getCurValue("isCleaningN"));
 		isCleaningS = Boolean.parseBoolean(executor.getCurValue("isCleaningS"));
 		lightNorth = Boolean.parseBoolean(executor.getCurValue("lightNorth"));
@@ -119,7 +132,7 @@ public class NeighberhoodSimulator extends JComponent {
 				if (garbageCansNorth[i] == false && random.nextInt(10) == 0) // 1:10 chance of trash can becoming full
 					garbageCansNorth[i] = true;
 			}
-			
+
 			if (garbageCansSouth[i] == true && garbageTruckSouth_location == i && isCleaningS)
 				garbageCansSouth[i] = false;
 			else {
@@ -150,7 +163,7 @@ public class NeighberhoodSimulator extends JComponent {
 		current_environment_state.put("sidewalkNorth", sidewalkNorth);
 		current_environment_state.put("sidewalkSouth", sidewalkSouth);
 		current_environment_state.put("crossingCrosswalkNS", crossingCrosswalkNS);
-		//current_environment_state.put("crossingCrosswalkSN", crossingCrosswalkSN);
+		// current_environment_state.put("crossingCrosswalkSN", crossingCrosswalkSN);
 		current_environment_state.put("garbageCansNorth", Arrays.toString(garbageCansNorth));
 		current_environment_state.put("garbageCansSouth", Arrays.toString(garbageCansSouth));
 

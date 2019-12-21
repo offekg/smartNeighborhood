@@ -75,10 +75,13 @@ public class SocketServer {
 				if ((Boolean) dataDict.get("data_exists") == true)
 					// TODO: process and send env vars to spectra.
 					input = "";
-				createAndSendResponseToClient(socket, spectraVarsToJson().toString(),
+				createAndSendResponseToClient(socket, spectraVarsToJson(0).toString(),
 						(Boolean) dataDict.get("isClientChrome"));
-			} else if (path.contains("scenario")) {
+			} else if (path.contains("api/scenario")) {
 				// TODO: handle scenarios.
+			} else if (path.contains("api/reset")) {
+				createAndSendResponseToClient(socket, spectraVarsToJson(-1).toString(),
+						(Boolean) dataDict.get("isClientChrome"));
 			} else
 				newConnectionFound(socket, parse, path);
 
@@ -94,7 +97,7 @@ public class SocketServer {
 		colorMe(messageTypes.INFO, shutdownMessage, true);
 		server.close();
 	}
-	
+
 	/*********************************************************************************/
 	/* Generic functions */
 	/*********************************************************************************/
@@ -133,7 +136,7 @@ public class SocketServer {
 
 		return dataDict;
 	}
-	
+
 	private static void colorMe(messageTypes type, String pleasePaintMe, boolean isHeader) {
 		if (isHeader)
 			pleasePaintMe = headerPrefixSuffix + pleasePaintMe + headerPrefixSuffix;
@@ -157,7 +160,7 @@ public class SocketServer {
 	/*********************************************************************************/
 	/* New connection functions */
 	/*******************************************************************************/
-	
+
 	private static void newConnectionFound(Socket socket, StringTokenizer parse, String path) throws IOException {
 		if (path.endsWith("/"))
 			path += DEFAULT_FILE;
@@ -214,7 +217,7 @@ public class SocketServer {
 	/*********************************************************************************/
 	/* Next state functions */
 	/*********************************************************************************/
-	
+
 	private static JSONObject parseInputToDataJsonObject(String input) {
 		JSONObject js = null;
 		String[] splitData = input.split("\n");
@@ -247,8 +250,8 @@ public class SocketServer {
 		}
 	}
 
-	private static JSONObject spectraVarsToJson() {
-		HashMap<String, HashMap<String, Object>> spectraVars = sim.getNextState(0);
+	private static JSONObject spectraVarsToJson(int scenario) {
+		HashMap<String, HashMap<String, Object>> spectraVars = sim.getNextState(scenario);
 		try {
 			JSONObject varsResponse = new JSONObject();
 			varsResponse.put("houseCount", houseCount);
