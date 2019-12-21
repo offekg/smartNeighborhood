@@ -25,17 +25,17 @@ public class NeighberhoodSimulator extends JComponent {
 	boolean crossingCrosswalkNS = false;
 	// boolean crossingCrosswalkSN;
 	boolean[] garbageCansNorth = new boolean[N];
-
-	// boolean[N] garbageCansSouth;
+	boolean[] garbageCansSouth = new boolean[N];
+	
 	/*-------------------------------*/
 
 	/***** System variables *****/
 	boolean isCleaningN;
-	// boolean isCleaningS;
+	boolean isCleaningS;
 	boolean lightNorth;
 	boolean lightSouth;
 	int garbageTruckNorth_location; // location N means not on the street.
-	// int garbageTruckSouth_location;
+	int garbageTruckSouth_location;
 	/*-------------------------------*/
 
 	int sim_itter = 0;
@@ -43,13 +43,17 @@ public class NeighberhoodSimulator extends JComponent {
 	public NeighberhoodSimulator() {
 
 		// Instantiate a new controller executor
-		executor = new ControllerExecutor(true, true);
+		executor = new ControllerExecutor(true, false);
 
-		for (int i = 0; i < N; i++)
+		for (int i = 0; i < N; i++) {
 			garbageCansNorth[i] = false;
+			garbageCansSouth[i] = false;
+		}
+			
 
 		try {
 			updateEnvVarsInSpectra();
+			
 			updateSystemVarsFromSpectra();
 		} catch (ControllerExecutorException e) {
 			// TODO: handle it gracefully.
@@ -81,8 +85,10 @@ public class NeighberhoodSimulator extends JComponent {
 	private void updateEnvVarsInSpectra() throws ControllerExecutorException {
 		System.out.println("Updating environment variables in Spectra");
 		
-		for (int i = 0; i < N; i++)
+		for (int i = 0; i < N; i++) {
 			executor.setInputValue(String.format("garbageCansNorth[%d]", i), String.valueOf(garbageCansNorth[i]));
+			executor.setInputValue(String.format("garbageCansSouth[%d]", i), String.valueOf(garbageCansSouth[i]));
+		}
 		executor.setInputValue("sidewalkSouth", String.valueOf(sidewalkSouth));
 		executor.setInputValue("sidewalkNorth", String.valueOf(sidewalkNorth));
 		executor.setInputValue("crossingCrosswalkNS", String.valueOf(crossingCrosswalkNS));
@@ -94,20 +100,31 @@ public class NeighberhoodSimulator extends JComponent {
 		System.out.println("Getting system variables from Spectra");
 		
 		isCleaningN = Boolean.parseBoolean(executor.getCurValue("isCleaningN"));
+		isCleaningS = Boolean.parseBoolean(executor.getCurValue("isCleaningS"));
 		lightNorth = Boolean.parseBoolean(executor.getCurValue("lightNorth"));
 		lightSouth = Boolean.parseBoolean(executor.getCurValue("lightSouth"));
 		garbageTruckNorth_location = Integer.parseInt(executor.getCurValue("garbageTruckNorth_location"));
+		garbageTruckSouth_location = Integer.parseInt(executor.getCurValue("garbageTruckSouth_location"));
 	}
 
 	public void randomNextState() {
+		if (sim_itter == 0) {
+			sim_itter += 1;
+			return;
+		}
 		for (int i = 0; i < N; i++) {
 			if (garbageCansNorth[i] == true && garbageTruckNorth_location == i && isCleaningN)
 				garbageCansNorth[i] = false;
 			else {
 				if (garbageCansNorth[i] == false && random.nextInt(10) == 0) // 1:10 chance of trash can becoming full
 					garbageCansNorth[i] = true;
-				/*else
-					garbageCansNorth[i] = false;*/
+			}
+			
+			if (garbageCansSouth[i] == true && garbageTruckSouth_location == i && isCleaningS)
+				garbageCansSouth[i] = false;
+			else {
+				if (garbageCansSouth[i] == false && random.nextInt(10) == 0) // 1:10 chance of trash can becoming full
+					garbageCansSouth[i] = true;
 			}
 		}
 
@@ -133,18 +150,17 @@ public class NeighberhoodSimulator extends JComponent {
 		current_environment_state.put("sidewalkNorth", sidewalkNorth);
 		current_environment_state.put("sidewalkSouth", sidewalkSouth);
 		current_environment_state.put("crossingCrosswalkNS", crossingCrosswalkNS);
-		// current_environment_state.put("crossingCrosswalkSN", crossingCrosswalkSN);
+		//current_environment_state.put("crossingCrosswalkSN", crossingCrosswalkSN);
 		current_environment_state.put("garbageCansNorth", Arrays.toString(garbageCansNorth));
 		current_environment_state.put("garbageCansSouth", sidewalkNorth);
 
 		HashMap<String, Object> current_system_state = new HashMap<>();
 		current_system_state.put("isCleaningN", isCleaningN);
-		// current_system_state.put("isCleaningS", isCleaningS);
+		current_system_state.put("isCleaningS", isCleaningS);
 		current_system_state.put("lightNorth", lightNorth);
-		// current_system_state.put("lightSouth", lightSouth);
+		current_system_state.put("lightSouth", lightSouth);
 		current_system_state.put("garbageTruckNorth_location", garbageTruckNorth_location);
-		// current_system_state.put("garbageTruckSouth_location",
-		// garbageTruckSouth_location);
+		current_system_state.put("garbageTruckSouth_location", garbageTruckSouth_location);
 
 		HashMap<String, HashMap<String, Object>> current_full_state = new HashMap<>();
 		current_full_state.put("environment", current_environment_state);
