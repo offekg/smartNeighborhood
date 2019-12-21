@@ -152,7 +152,7 @@ public class NeighberhoodSimulator extends JComponent {
 		current_environment_state.put("crossingCrosswalkNS", crossingCrosswalkNS);
 		//current_environment_state.put("crossingCrosswalkSN", crossingCrosswalkSN);
 		current_environment_state.put("garbageCansNorth", Arrays.toString(garbageCansNorth));
-		current_environment_state.put("garbageCansSouth", sidewalkNorth);
+		current_environment_state.put("garbageCansSouth", Arrays.toString(garbageCansSouth));
 
 		HashMap<String, Object> current_system_state = new HashMap<>();
 		current_system_state.put("isCleaningN", isCleaningN);
