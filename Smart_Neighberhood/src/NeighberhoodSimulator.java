@@ -104,10 +104,10 @@ public class NeighberhoodSimulator extends JComponent {
 			if (garbageCansNorth[i] == true && garbageTruckNorth_location == i && isCleaningN)
 				garbageCansNorth[i] = false;
 			else {
-				if (random.nextInt(5) == 0) // 1:5 chance of trash can becoming full
+				if (garbageCansNorth[i] == false && random.nextInt(10) == 0) // 1:10 chance of trash can becoming full
 					garbageCansNorth[i] = true;
-				else
-					garbageCansNorth[i] = false;
+				/*else
+					garbageCansNorth[i] = false;*/
 			}
 		}
 
