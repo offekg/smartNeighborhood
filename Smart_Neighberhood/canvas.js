@@ -4,7 +4,6 @@ let currentState;
 let nextState;
 let isNextUpdated;
 let states;
-const numStates = 8;
 
 const animationTime = 120;
 
@@ -50,10 +49,8 @@ const finalBottomPersonY = streetH + roadH - personH;
 let personX = initTopPersonX;
 let personY = initTopPersonY;
 
-// const initTopTruckX = - truckH * truckImageRatio;
 const initTopTruckX = - 3 * block / 4;
 const initTopTruckY = streetH - 20;
-// const initBottomTruckX = canvasW;
 const initBottomTruckX = canvasW + block / 4;
 const initBottomTruckY = streetH + roadH / 2 - 20;
 let topTruckX = initTopTruckX;
@@ -72,18 +69,15 @@ function getNextState() {
   let xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-     console.log(this.responseText);
-     // console.log(JSON.parse(this.responseText));
      nextState = JSON.parse(this.responseText);
+     nextState.system.garbageTruckSouth_location = 3 - nextState.system.garbageTruckSouth_location;
      // TODO: remove once API is complete.
-     nextState.environment.garbageCansSouth = nextState.environment.garbageCansNorth;
      nextState.environment.isNight = false;
-     nextState.environment.lightSouth = nextState.environment.lightNorth;
-     nextState.system.garbageTruckSouth_location = 4;
      isNextUpdated = true;
      waitingResponse = false;
      if (stateIndex == 0) {
        currentState = nextState;
+       console.log(currentState);
        isNextUpdated = false;
        stateIndex++;
        animate();
@@ -98,20 +92,19 @@ function animate() {
   paintBackground();
   paintStreetLamps(false);
   let animatingTop = animateTopTruck();
-  // let animatingBottom = animateBottomTruck();
-  let animatingBottom = false;
-  // let animatingPerson = animatePerson();
-  let animatingPerson = false;
-  if (!animatingPerson && !animatingTop && !animatingBottom && stateIndex < numStates) {
+  let animatingBottom = animateBottomTruck();
+  let animatingPerson = animatePerson();
+  if (!animatingPerson && !animatingTop && !animatingBottom) {
     if (isNextUpdated) {
       currentState = nextState;
+      console.log(currentState.system);
       isNextUpdated = false;
       stateIndex++;
-      } else {
+    } else {
       console.log("State not updated. Index:" + stateIndex);
     }
   }
-  if (!isNextUpdated && !waitingResponse && stateIndex < numStates) {
+  if (!isNextUpdated && !waitingResponse) {
     getNextState();
   }
   paintStreetLamps(true);
@@ -124,6 +117,9 @@ function animateTopTruck() {
   if (topTruckX < block * currentState.system.garbageTruckNorth_location + block / 4) {
     topTruckX += block / animationTime;
     animating = true;
+  } else if (currentState.system.garbageTruckNorth_location == 0
+    && topTruckX > block * currentState.system.garbageTruckNorth_location + block / 2) {
+    topTruckX = initTopTruckX;
   }
   if (currentState.system.isCleaningN && topTruckY > initTopTruckY - 30){
     topTruckY -= 1;
@@ -142,6 +138,9 @@ function animateBottomTruck(){
   if (bottomTruckX > block * currentState.system.garbageTruckSouth_location + block / 4){
     bottomTruckX -= block / animationTime;
     animating = true;
+  } else if (currentState.system.garbageTruckSouth_location == 3
+    && bottomTruckX < block * currentState.system.garbageTruckSouth_location) {
+    bottomTruckX = initBottomTruckX;
   }
   if (currentState.system.isCleaningS && bottomTruckY < initBottomTruckY + 30) {
     bottomTruckY += 1;
