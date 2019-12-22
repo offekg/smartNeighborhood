@@ -141,7 +141,7 @@ public class NeighberhoodSimulator extends JComponent {
 			}
 		}
 
-		if (crossingCrosswalkNS || random.nextInt(1) == 0) // 1:5 chance of pedestrian on south sidewalk
+		if (crossingCrosswalkNS)// || random.nextInt(1) == 0) // 1:5 chance of pedestrian on south sidewalk
 			sidewalkSouth = true;
 		else
 			sidewalkSouth = false;
@@ -151,7 +151,7 @@ public class NeighberhoodSimulator extends JComponent {
 		else
 			crossingCrosswalkNS = false;
 
-		if (random.nextInt(4) == 0) // 1:4 chance of pedestrian on north sidewalk
+		if (random.nextInt(10) == 0) // 1:10 chance of pedestrian on north sidewalk
 			sidewalkNorth = true;
 		else
 			sidewalkNorth = false;
