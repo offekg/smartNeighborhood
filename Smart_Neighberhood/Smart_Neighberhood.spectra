@@ -79,9 +79,9 @@ gar !isCleaningS;
 //***truck Guarantees***
 //If truck is before crosswalk, and someone is crossing, then it won't move
 gar G (crossing & (garbageTruckNorth_location = crosswalkLoc)) ->
-    (next(garbageTruckNorth_location) = crosswalkLoc); 
-gar G (crossing & garbageTruckSouth_location = crosswalkLoc) ->
-   next(garbageTruckSouth_location = crosswalkLoc); 
+   (next(garbageTruckNorth_location) = crosswalkLoc); 
+gar G (crossing & (garbageTruckSouth_location = crosswalkLoc)) ->
+   (next(garbageTruckSouth_location) = crosswalkLoc); 
 
 //If truck at full can, stays there to clean next turn
 predicate truckAtFullCanWillCleanNorth(Int(0..(3)) i):
@@ -166,7 +166,7 @@ gar G (!garbageCansSouth[3] & garbageTruckSouth_location = 3) -> (next(garbageTr
 
 define at_least_one_can_full := 
 	garbageCansNorth[0] | garbageCansNorth[1] | garbageCansNorth[2] | garbageCansNorth[3];
-	
+ 
 weight -1
 	at_least_one_can_full & garbageTruckNorth_location = N;
 
