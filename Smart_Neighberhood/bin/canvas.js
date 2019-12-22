@@ -4,6 +4,7 @@ let currentState;
 let nextState;
 let isNextUpdated;
 let states;
+let notFoundCount = 0;
 
 const animationTime = 120;
 
@@ -53,15 +54,16 @@ const initTopTruckX = - 3 * block / 4;
 const initTopTruckY = streetH - 20;
 const initBottomTruckX = canvasW + block / 4;
 const initBottomTruckY = streetH + roadH / 2 - 20;
-let topTruckX = initTopTruckX;
+let topTruckX = Number.MAX_SAFE_INTEGER;
 let topTruckY = initTopTruckY;
-let bottomTruckX = initBottomTruckX;
+let bottomTruckX = Number.MIN_SAFE_INTEGER;
 let bottomTruckY = initBottomTruckY;
 var truckImg = new Image();
 truckImg.src = "truck.png";
 var truckRevImg = new Image();
 truckRevImg.src = "truckRev.png";
 
+debugger;
 getNextState();
 
 function getNextState() {
@@ -73,6 +75,7 @@ function getNextState() {
      nextState.system.garbageTruckSouth_location = 3 - nextState.system.garbageTruckSouth_location;
      // TODO: remove once API is complete.
      nextState.environment.isNight = false;
+     nextState.environment. garbageCansSouth.reverse();
      isNextUpdated = true;
      waitingResponse = false;
      if (stateIndex == 0) {
@@ -89,6 +92,7 @@ function getNextState() {
 }
 
 function animate() {
+  debugger;
   paintBackground();
   paintStreetLamps(false);
   let animatingTop = animateTopTruck();
@@ -96,12 +100,18 @@ function animate() {
   let animatingPerson = animatePerson();
   if (!animatingPerson && !animatingTop && !animatingBottom) {
     if (isNextUpdated) {
+      if (currentState.environment.sidewalkSouth) {
+        personX = initTopPersonX;
+        personY = initTopPersonY;
+      }
       currentState = nextState;
-      console.log(currentState.system);
+      console.log(currentState);
       isNextUpdated = false;
       stateIndex++;
     } else {
       console.log("State not updated. Index:" + stateIndex);
+      notFoundCount++;
+      if (notFoundCount > 10) return;
     }
   }
   if (!isNextUpdated && !waitingResponse) {
