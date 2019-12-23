@@ -8,35 +8,36 @@ let notFoundCount = 0;
 
 const animationTime = 120;
 
-let opacity = 0;
-const lightC = "#fff200";
-let roadC = "#656262";
-let arrowC = "#ffffff";
-const arrowH = 10;
-const arrowW = 40;
 const canvas = document.querySelector('canvas');
 const canvasH = canvas.height;
 const canvasW = canvas.width;
-const crossingBlockH = 17;
-let crossingC = "#ffffff";
-const crossingSpaceH = 10;
-const crossingW = 80;
+let opacity = 0;
 let ctx = canvas.getContext('2d');
-let houseC = "#fcfcfc";
-let roofC = "#bd3d24";
-const houseH = 52;
-const houseW = 62;
+
 const numHouses = 4;
-let sidewalkC = "#efe5b0";
-const sidewalkH = 30;
-let streetC = "#3da744";
-const streetH = 125;
-let trashC = "black";
-let trashCanC = "#c2c2c2";
+const block = canvasW / numHouses;
+const streetH = canvasH * 0.27;
+const streetC = "#3da744";
 const roadH = canvasH - 2 * streetH;
+const roadC = "#656262";
+const houseH = streetH * 0.416;
+const houseW = houseH * 1.2;
+const houseC = "#fcfcfc";
+const crossingSpaceH = roadH / 20;
+const crossingW = crossingSpaceH * 8;
+const crossingC = "#ffffff";
+const roofC = "#bd3d24";
+const sidewalkC = "#efe5b0";
+const sidewalkH = streetH / 4;
+const trashC = "black";
+const trashCanC = "#c2c2c2";
+const lightC = "#fff200";
+const arrowC = "#ffffff";
+const arrowH = roadH / 20;
+const arrowW = arrowH * 4;
+const crossingBlockH = 17;
 const truckH = (roadH*2)/3;
 const truckImageRatio = 564/516;
-const block = canvasW / numHouses;
 
 const personH = houseH * 1.5;
 const personImageRatio = 530 / 852;
@@ -51,9 +52,9 @@ let personX = initTopPersonX;
 let personY = initTopPersonY;
 
 const initTopTruckX = - 3 * block / 4;
-const initTopTruckY = streetH - 20;
+const initTopTruckY = streetH - roadH / 10;
 const initBottomTruckX = canvasW + block / 4;
-const initBottomTruckY = streetH + roadH / 2 - 20;
+const initBottomTruckY = streetH + roadH / 2 - roadH / 10;
 let topTruckX = Number.MAX_SAFE_INTEGER;
 let topTruckY = initTopTruckY;
 let bottomTruckX = Number.MIN_SAFE_INTEGER;
@@ -64,7 +65,7 @@ var truckRevImg = new Image();
 truckRevImg.src = "truckRev.png";
 
 debugger;
-getNextState();
+// getNextState();
 
 function getNextState() {
   waitingResponse = true;
@@ -131,7 +132,7 @@ function animateTopTruck() {
     && topTruckX > block * currentState.system.garbageTruckNorth_location + block / 2) {
     topTruckX = initTopTruckX;
   }
-  if (currentState.system.isCleaningN && topTruckY > initTopTruckY - 30){
+  if (currentState.system.isCleaningN && topTruckY > initTopTruckY - roadH / 10){
     topTruckY -= 1;
     animating = true;
   }
@@ -152,7 +153,7 @@ function animateBottomTruck(){
     && bottomTruckX < block * currentState.system.garbageTruckSouth_location) {
     bottomTruckX = initBottomTruckX;
   }
-  if (currentState.system.isCleaningS && bottomTruckY < initBottomTruckY + 30) {
+  if (currentState.system.isCleaningS && bottomTruckY < initBottomTruckY + roadH / 10) {
     bottomTruckY += 1;
     animating = true;
   }
@@ -229,7 +230,7 @@ function paintStreet(left, top, width, height, isBottom){
       ctx.fillRect(left, top, width, sidewalkH);
   }
   for (i = 0; i < numHouses; i++) {
-      paintHouse(i, isBottom, block * i + block / 2 - houseW/2, top + 50 , houseW, houseH);
+      paintHouse(i, isBottom, block * i + block / 2 - houseW/2, top + houseH , houseW, houseH);
   }
 }
 
@@ -277,14 +278,14 @@ function paintHouse(index, isBottom, left, top, width, height) {
   ctx.fillStyle = roofC;
   ctx.beginPath();
   ctx.moveTo(left, top);
-  ctx.lineTo(left+width/2, top-30);
+  ctx.lineTo(left+width/2, top-height * 0.6);
   ctx.lineTo(left+width, top);
   ctx.fill();
   ctx.fillStyle = trashCanC;
   const trashCanW = width / 2;
   const trashCanH = height / 2;
   const trashH = height / 4;
-  const trashOffset = 12;
+  const trashOffset = width / 5;
   ctx.fillRect(left + width + trashOffset - 1, top + height  - trashCanH, trashCanW, trashCanH);
   let hasGarbage = isBottom ? currentState.environment.garbageCansSouth[index] :
                               currentState.environment.garbageCansNorth[index];

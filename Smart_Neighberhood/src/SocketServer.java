@@ -210,6 +210,10 @@ public class SocketServer {
 	private static String getContentType(String fileRequested) {
 		if (fileRequested.endsWith(".htm") || fileRequested.endsWith(".html"))
 			return "text/html";
+		if (fileRequested.endsWith(".css"))
+			return "text/css";
+		if (fileRequested.endsWith(".css"))
+			return "text/javascript";
 		else
 			return "text/plain";
 	}
