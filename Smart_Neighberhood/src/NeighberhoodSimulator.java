@@ -19,15 +19,21 @@ public class NeighberhoodSimulator extends JComponent {
 
 	ControllerExecutor executor;
 	Random random = new Random();
+	enum DayTimeMode {DAY, NIGHT};
+	int N = 4;
 
 	/***** Environment variables *****/
-	int N = 4;
 	boolean sidewalkNorth;
 	boolean sidewalkSouth;
 	boolean crossingCrosswalkNS;
 	// boolean crossingCrosswalkSN;
 	boolean[] garbageCansNorth = new boolean[N];
 	boolean[] garbageCansSouth = new boolean[N];
+	DayTimeMode dayTime;
+	boolean energyEfficiencyMode;
+	
+	/* dayTimrRelated */
+	int countHours = 0;
 
 	/*-------------------------------*/
 
@@ -91,6 +97,9 @@ public class NeighberhoodSimulator extends JComponent {
 			garbageCansNorth[i] = false;
 			garbageCansSouth[i] = false;
 		}
+		dayTime = DayTimeMode.DAY;
+		energyEfficiencyMode = false;
+		
 		sim_itter = 0;
 	}
 
@@ -104,6 +113,9 @@ public class NeighberhoodSimulator extends JComponent {
 		executor.setInputValue("sidewalkSouth", String.valueOf(sidewalkSouth));
 		executor.setInputValue("sidewalkNorth", String.valueOf(sidewalkNorth));
 		executor.setInputValue("crossingCrosswalkNS", String.valueOf(crossingCrosswalkNS));
+		executor.setInputValue("dayTime", String.valueOf(dayTime));
+		executor.setInputValue("energyEfficiencyMode", String.valueOf(energyEfficiencyMode));
+
 
 		executor.updateState(true, true); // TODO: I changed it to false due to many errors it gave me, check what is
 											// right
@@ -155,6 +167,14 @@ public class NeighberhoodSimulator extends JComponent {
 			sidewalkNorth = true;
 		else
 			sidewalkNorth = false;
+		
+		energyEfficiencyMode = false;
+		
+		if (countHours == 12) {
+			dayTime = DayTimeMode.values()[(dayTime.ordinal() + 1) % 2];
+			countHours = 0;
+		}
+		countHours++;
 
 	}
 
