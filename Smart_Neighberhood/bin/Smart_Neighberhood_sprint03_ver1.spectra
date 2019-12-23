@@ -1,17 +1,9 @@
 
-spec SmartNeighborhood_sprint03_ver1
-
-// *** define type of day and night ***
-type DayTime = {DAY, NIGHT};
-
+spec SmartNeighborhood_sprint02_ver1
 
 //***Environment controlled input variables (sensors)***
 define N := 4;
 define crosswalkLoc := 1; //between can 1 and 2.
-
-env DayTime dayTime;
-env boolean energyEfficiencyMode;
-
 env boolean sidewalkNorth;
 env boolean sidewalkSouth;
 env boolean crossingCrosswalkNS;
@@ -28,17 +20,11 @@ sys boolean lightSouth;
 sys Int(0..N) garbageTruckNorth_location; //location N means not on the street.
 sys Int(0..N) garbageTruckSouth_location;
 
-//***Assumptions on day and night***
-asm GF dayTime=DAY;
-asm GF dayTime=NIGHT;
-
-
 //***Initial assumptions***
 //all pedestrian areas start empty
 asm !sidewalkNorth & !sidewalkSouth & !crossingCrosswalkNS; //& !crossingCrosswalkSN;
 asm all_cans_start_empty:
 	forall i in Int(0..(N-1)). ((!garbageCansNorth[i]) & !garbageCansSouth[i]);
-asm dayTime=DAY;
 
 
 
@@ -168,8 +154,6 @@ gar G garbageTruckNorth_location = N -> (next(garbageTruckNorth_location) = 0 | 
 gar G garbageTruckSouth_location = N -> (next(garbageTruckSouth_location) = 0 | next(garbageTruckSouth_location) = N);
 
 //Truck on empty can will keep moving
-
-// pattern pResponsetoS????
 gar G (!garbageCansNorth[0] & garbageTruckNorth_location = 0) -> (next(garbageTruckNorth_location) = 1);
 gar G (!garbageCansNorth[1] & garbageTruckNorth_location = 1 & !crossing) -> (next(garbageTruckNorth_location) = 2);
 gar G (!garbageCansNorth[2] & garbageTruckNorth_location = 2) -> (next(garbageTruckNorth_location) = 3);
@@ -182,8 +166,7 @@ gar G (!garbageCansSouth[3] & garbageTruckSouth_location = 3) -> (next(garbageTr
 
 define at_least_one_can_full := 
 	garbageCansNorth[0] | garbageCansNorth[1] | garbageCansNorth[2] | garbageCansNorth[3];
-	
-
+ 
 weight -1
 	at_least_one_can_full & garbageTruckNorth_location = N;
 
@@ -193,27 +176,13 @@ weight 1
 	
 
 //***Light Guarantees***
-
-
-//*** not in energy saving mode ***
-gar G (dayTime=NIGHT & !energyEfficiencyMode)-> (lightNorth & lightSouth);
-gar G (dayTime=DAY) -> (!lightNorth & !lightSouth);
-
-//*** in energy saving mode***
-gar G (!sidewalkNorth & energyEfficiencyMode) -> !lightNorth; 
-gar G (!sidewalkSouth & energyEfficiencyMode)-> !lightSouth;
-
-gar G ((dayTime= NIGHT) & sidewalkNorth & energyEfficiencyMode) -> lightNorth; 
-gar G ((dayTime= NIGHT) & sidewalkSouth & energyEfficiencyMode) -> lightSouth;
-
-/* 
 gar G sidewalkNorth -> lightNorth;
 gar G sidewalkSouth -> lightSouth;
-gar GF !lightNorth;   //not needed because there is GF on sidewalk
+gar GF !lightNorth;
 gar GF !lightSouth;
 gar G !sidewalkNorth -> !lightNorth; 
 gar G !sidewalkSouth-> !lightSouth;
-*/
+ 
 
 /*weight -1
 	lightNorth;

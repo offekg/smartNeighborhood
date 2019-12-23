@@ -10,6 +10,9 @@ const animationTime = 120;
 
 const canvas = document.querySelector('canvas');
 const canvasH = canvas.height;
+// canvas.style.width ='100%';
+// canvas.width  = canvas.offsetWidth;
+canvas.width = window.innerWidth;
 const canvasW = canvas.width;
 let opacity = 0;
 let ctx = canvas.getContext('2d');
@@ -64,8 +67,7 @@ truckImg.src = "truck.png";
 var truckRevImg = new Image();
 truckRevImg.src = "truckRev.png";
 
-debugger;
-// getNextState();
+getNextState();
 
 function getNextState() {
   waitingResponse = true;

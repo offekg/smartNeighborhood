@@ -168,10 +168,16 @@ public class NeighberhoodSimulator extends JComponent {
 		else
 			sidewalkNorth = false;
 		
-		energyEfficiencyMode = false;
-		
-		if (countHours == 12) {
+		if (countHours != 0 && countHours % 12 == 0) {
 			dayTime = DayTimeMode.values()[(dayTime.ordinal() + 1) % 2];
+			if (dayTime == DayTimeMode.DAY)
+				energyEfficiencyMode = false;
+			else {
+				if (countHours == 24) {
+					energyEfficiencyMode = true;
+					countHours = 0;
+				}
+			}
 			countHours = 0;
 		}
 		countHours++;
