@@ -77,8 +77,8 @@ function getNextState() {
      nextState = JSON.parse(this.responseText);
      nextState.system.garbageTruckSouth_location = 3 - nextState.system.garbageTruckSouth_location;
      // TODO: remove once API is complete.
-     nextState.environment.isNight = false;
-     nextState.environment. garbageCansSouth.reverse();
+     // nextState.environment.isNight = false;
+     nextState.environment.garbageCansSouth.reverse();
      isNextUpdated = true;
      waitingResponse = false;
      if (stateIndex == 0) {
@@ -95,7 +95,6 @@ function getNextState() {
 }
 
 function animate() {
-  debugger;
   paintBackground();
   paintStreetLamps(false);
   let animatingTop = animateTopTruck();
