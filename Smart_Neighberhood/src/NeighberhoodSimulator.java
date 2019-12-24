@@ -47,6 +47,8 @@ public class NeighberhoodSimulator extends JComponent {
 	/*-------------------------------*/
 
 	int sim_itter;
+	
+	// Queue<HashMap<String, Object>> scenarioQueue = new Queue<HashMap<String, Object>>();
 
 	public NeighberhoodSimulator() {
 		setEnvVarsToDefault();
@@ -61,15 +63,36 @@ public class NeighberhoodSimulator extends JComponent {
 
 	}
 
-	public HashMap<String, HashMap<String, Object>> getNextState(int scenario_num) {
+	public HashMap<String, HashMap<String, Object>> getNextState(int scenario_num, HashMap<String, Object> dataFromClient) {
 		switch (scenario_num) {
 		case -1:
 			setEnvVarsToDefault();
 			break;
-		case 0: // random scenario
+		case 0: // random mode.
 			randomNextState();
 			break;
-		case 1:
+		case 1: // semi-automatic mode.
+			randomNextState();
+			updateEnvVarsFromClient(dataFromClient);
+			break;
+		case 2: // manual mode.
+			updateEnvVarsFromClient(dataFromClient);
+			break;
+		case 3: // scenario number 1
+			break;
+		case 4: // scenario number 2
+			break;
+		case 5: // scenario number 3
+			break;
+		case 6: // scenario number 4
+			break;
+		case 7: // scenario number 5
+			break;
+		case 8: // scenario number 6
+			break;
+		case 9: // scenario number 7
+			break;
+		case 10: // scenario number 8
 			break;
 		}
 
@@ -85,7 +108,7 @@ public class NeighberhoodSimulator extends JComponent {
 		return getSpectraVarsAsDict();
 	}
 	
-	public void setEnvVarsToDefault() {
+	private void setEnvVarsToDefault() {
 		// Instantiate a new controller executor
 		executor = new ControllerExecutor(true, false);
 		
@@ -132,7 +155,7 @@ public class NeighberhoodSimulator extends JComponent {
 		garbageTruckSouth_location = Integer.parseInt(executor.getCurValue("garbageTruckSouth_location"));
 	}
 
-	public void randomNextState() {
+	private void randomNextState() {
 		if (sim_itter == 0) {
 			sim_itter += 1;
 			return;
@@ -207,5 +230,41 @@ public class NeighberhoodSimulator extends JComponent {
 		current_full_state.put("system", current_system_state);
 
 		return current_full_state;
+	}
+	
+	private void updateEnvVarsFromClient(HashMap<String, Object> dataFromClient) {
+		if (dataFromClient== null)
+			return;
+		
+		for (String var : dataFromClient.keySet()) {
+			switch (var) {
+			case "sidewalkNorth":
+				sidewalkNorth = (boolean) dataFromClient.get("sidewalkNorth");
+				break;
+			case "sidewalkSouth":
+				sidewalkSouth = (boolean) dataFromClient.get("sidewalkSouth");
+				break;
+			case "crossingCrosswalkNS":
+				crossingCrosswalkNS = (boolean) dataFromClient.get("crossingCrosswalkNS");
+				break;
+//			case "crossingCrosswalkSN":
+//				crossingCrosswalkSN = (boolean) dataFromClient.get("crossingCrosswalkSN");
+//				break;
+			case "garbageCansNorth":
+				garbageCansNorth = (boolean[]) dataFromClient.get("garbageCansNorth");
+				break;
+			case "garbageCansSouth":
+				garbageCansSouth = (boolean[]) dataFromClient.get("garbageCansSouth");
+				break;
+			case "dayTime":
+				dayTime = (DayTimeMode) dataFromClient.get("dayTime");
+				break;
+			case "energyEfficiencyMode":
+				energyEfficiencyMode = (boolean) dataFromClient.get("energyEfficiencyMode");
+				break;
+			default:
+				break;
+			}
+		}
 	}
 }

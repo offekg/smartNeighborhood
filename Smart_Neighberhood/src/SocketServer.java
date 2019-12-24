@@ -46,7 +46,7 @@ public class SocketServer {
 
 	private static int houseCount = 4;
 	private static String[] envVars = new String[] { "sidewalkNorth", "sidewalkSouth", "crossingCrosswalkNS",
-			"crossingCrosswalkSN", "garbageCansNorth", "garbageCansSouth" };
+			"crossingCrosswalkSN", "garbageCansNorth", "garbageCansSouth", "dayTime", "energyEfficiencyMode" };
 	private static String[] sysVars = new String[] { "isCleaningN", "isCleaningS", "lightNorth", "lightSouth",
 			"garbageTruckNorth_location", "garbageTruckSouth_location" };
 
@@ -73,14 +73,15 @@ public class SocketServer {
 
 			if (path.contains("api")) {
 				if ((Boolean) dataDict.get("data_exists") == true)
-					// TODO: process and send env vars to spectra.
-					input = "";
-				createAndSendResponseToClient(socket, spectraVarsToJson(0).toString(),
-						(Boolean) dataDict.get("isClientChrome"));
+					createAndSendResponseToClient(socket, spectraVarsToJson(1, dataDict).toString(),
+							(Boolean) dataDict.get("isClientChrome"));
+				else
+					createAndSendResponseToClient(socket, spectraVarsToJson(0, null).toString(),
+							(Boolean) dataDict.get("isClientChrome"));
 			} else if (path.contains("api/scenario")) {
 				// TODO: handle scenarios.
 			} else if (path.contains("api/reset")) {
-				createAndSendResponseToClient(socket, spectraVarsToJson(-1).toString(),
+				createAndSendResponseToClient(socket, spectraVarsToJson(-1, null).toString(),
 						(Boolean) dataDict.get("isClientChrome"));
 			} else
 				newConnectionFound(socket, parse, path);
@@ -254,8 +255,8 @@ public class SocketServer {
 		}
 	}
 
-	private static JSONObject spectraVarsToJson(int scenario) {
-		HashMap<String, HashMap<String, Object>> spectraVars = sim.getNextState(scenario);
+	private static JSONObject spectraVarsToJson(int scenario, HashMap<String, Object> dataFromClient) {
+		HashMap<String, HashMap<String, Object>> spectraVars = sim.getNextState(scenario, dataFromClient);
 		try {
 			JSONObject varsResponse = new JSONObject();
 			varsResponse.put("houseCount", houseCount);
@@ -274,13 +275,8 @@ public class SocketServer {
 		for (String envVar : envVars) {
 			try {
 				Object varValue = data.get(envVar);
+
 				if (envVar == "garbageCansNorth" || envVar == "garbageCansSouth") {
-					/*
-					 * JSONArray subData = (JSONArray) varValue;
-					 * 
-					 * for (Integer i = 0; i < houseCount; i++) { envVarsValues.put(envVar +
-					 * i.toString(), Boolean.parseBoolean(subData.get(i).toString())); }
-					 */
 					envVarsValues.put(envVar, (Boolean[]) varValue);
 				} else {
 					envVarsValues.put(envVar, (Boolean) varValue);
@@ -290,9 +286,6 @@ public class SocketServer {
 				colorMe(messageTypes.ERROR, issueWithMessage + envVar, false);
 				envVarsValues = new HashMap<>();
 				break;
-			}
-
-			finally {
 			}
 		}
 
