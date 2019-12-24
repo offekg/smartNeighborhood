@@ -186,6 +186,7 @@ public class NeighberhoodSimulator extends JComponent {
 
 	private HashMap<String, HashMap<String, Object>> getSpectraVarsAsDict() {
 		HashMap<String, Object> current_environment_state = new HashMap<>();
+		current_environment_state.put("isNight",dayTime == DayTimeMode.NIGHT);
 		current_environment_state.put("sidewalkNorth", sidewalkNorth);
 		current_environment_state.put("sidewalkSouth", sidewalkSouth);
 		current_environment_state.put("crossingCrosswalkNS", crossingCrosswalkNS);
