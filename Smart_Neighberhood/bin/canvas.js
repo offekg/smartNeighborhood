@@ -82,10 +82,7 @@ function getNextState() {
      isNextUpdated = true;
      waitingResponse = false;
      if (stateIndex == 0) {
-       currentState = nextState;
-       console.log(currentState);
-       isNextUpdated = false;
-       stateIndex++;
+       changeState(true);
        animate();
      }
     }
@@ -102,14 +99,7 @@ function animate() {
   let animatingPerson = animatePerson();
   if (!animatingPerson && !animatingTop && !animatingBottom) {
     if (isNextUpdated) {
-      if (currentState.environment.sidewalkSouth) {
-        personX = initTopPersonX;
-        personY = initTopPersonY;
-      }
-      currentState = nextState;
-      console.log(currentState);
-      isNextUpdated = false;
-      stateIndex++;
+      changeState();
     } else {
       console.log("State not updated. Index:" + stateIndex);
       notFoundCount++;
@@ -117,10 +107,25 @@ function animate() {
     }
   }
   if (!isNextUpdated && !waitingResponse) {
-    getNextState();
+    getNextState(false);
   }
   paintStreetLamps(true);
   requestAnimationFrame(animate);
+}
+
+function changeState(isFirst) {
+  if (!isFirst && currentState.environment.sidewalkSouth) {
+    personX = initTopPersonX;
+    personY = initTopPersonY;
+  }
+  currentState = nextState;
+  for (let i = 0; i < numHouses; i++){
+    $("#gb" + 0 + i).attr("disabled", currentState.environment.garbageCansNorth[i]);
+    $("#gb" + 1 + i).attr("disabled", currentState.environment.garbageCansSouth[i]);
+  }
+  console.log(currentState);
+  isNextUpdated = false;
+  stateIndex++;
 }
 
 function animateTopTruck() {
@@ -190,7 +195,7 @@ function paintBackground(){
   paintNight();
   if (opacity > 0.2) {
     for (i = 0; i < numHouses; i++) {
-        paintHouseLight(block * i + block / 2 - houseW/2, 50 , houseW, houseH, lightC);
+        paintHouseLight(block * i + block / 2 - houseW/2, canvasH / 9 , houseW, houseH, lightC);
     }
   }
 }
@@ -290,6 +295,9 @@ function paintHouse(index, isBottom, left, top, width, height) {
   ctx.fillRect(left + width + trashOffset - 1, top + height  - trashCanH, trashCanW, trashCanH);
   let hasGarbage = isBottom ? currentState.environment.garbageCansSouth[index] :
                               currentState.environment.garbageCansNorth[index];
+  let buttonIndex = hasGarbage ? index + numHouses / 2 : index;
+  let lineId = isBottom ? "1" : "0";
+  let buttonId = "gb" + lineId + index;
   if (hasGarbage) {
     ctx.fillStyle = trashC;
     ctx.beginPath();
