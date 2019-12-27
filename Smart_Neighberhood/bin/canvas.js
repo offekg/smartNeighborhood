@@ -10,33 +10,33 @@ const animationTime = 120;
 
 const canvas = document.querySelector('canvas');
 const canvasH = canvas.height;
-// canvas.style.width ='100%';
-// canvas.width  = canvas.offsetWidth;
-canvas.width = window.innerWidth;
+canvas.style.width ='100%';
+canvas.width  = canvas.offsetWidth;
+// canvas.width = window.innerWidth;
 const canvasW = canvas.width;
 let opacity = 0;
 let ctx = canvas.getContext('2d');
 
 const numHouses = 4;
-const block = canvasW / numHouses;
-const streetH = canvasH * 0.27;
+const block = Math.round(canvasW / numHouses);
+const streetH = Math.round(canvasH * 0.27);
 const streetC = "#3da744";
 const roadH = canvasH - 2 * streetH;
 const roadC = "#656262";
-const houseH = streetH * 0.416;
-const houseW = houseH * 1.2;
+const houseH = Math.round(streetH * 0.416);
+const houseW = Math.round(houseH * 1.2);
 const houseC = "#fcfcfc";
-const crossingSpaceH = roadH / 20;
+const crossingSpaceH = Math.round(roadH / 20);
 const crossingW = crossingSpaceH * 8;
 const crossingC = "#ffffff";
 const roofC = "#bd3d24";
 const sidewalkC = "#efe5b0";
-const sidewalkH = streetH / 4;
+const sidewalkH = Math.round(streetH / 4);
 const trashC = "black";
 const trashCanC = "#c2c2c2";
 const lightC = "#fff200";
 const arrowC = "#ffffff";
-const arrowH = roadH / 20;
+const arrowH = Math.round(roadH / 20);
 const arrowW = arrowH * 4;
 const crossingBlockH = 17;
 const truckH = (roadH*2)/3;
@@ -132,7 +132,7 @@ function animateTopTruck() {
   let animating = false;
   ctx.drawImage(truckImg, topTruckX, topTruckY, truckH * truckImageRatio, truckH);
   if (topTruckX < block * currentState.system.garbageTruckNorth_location + block / 4) {
-    topTruckX += block / animationTime;
+    topTruckX += Math.round(block / animationTime);
     animating = true;
   } else if (currentState.system.garbageTruckNorth_location == 0
     && topTruckX > block * currentState.system.garbageTruckNorth_location + block / 2) {
@@ -153,7 +153,7 @@ function animateBottomTruck(){
   let animating = false;
   ctx.drawImage(truckRevImg, bottomTruckX, bottomTruckY, truckH * truckImageRatio, truckH);
   if (bottomTruckX > block * currentState.system.garbageTruckSouth_location + block / 4){
-    bottomTruckX -= block / animationTime;
+    bottomTruckX -= Math.round(block / animationTime);
     animating = true;
   } else if (currentState.system.garbageTruckSouth_location == 3
     && bottomTruckX < block * currentState.system.garbageTruckSouth_location) {
@@ -174,7 +174,7 @@ function animatePerson(){
   let animating = false;
   ctx.drawImage(personImg, personX, personY, personW, personH);
   if (currentState.environment.sidewalkNorth && personX < (canvasW / 2) - (personW / 2)){
-    personX += (canvasW / 2 + personW / 2) / animationTime;
+    personX += Math.round((canvasW / 2 + personW / 2) / animationTime);
     animating = true;
   }
   if (currentState.environment.crossingCrosswalkNS && personY < finalBottomPersonY) {
@@ -236,7 +236,7 @@ function paintStreet(left, top, width, height, isBottom){
       ctx.fillRect(left, top, width, sidewalkH);
   }
   for (i = 0; i < numHouses; i++) {
-      paintHouse(i, isBottom, block * i + block / 2 - houseW/2, top + houseH , houseW, houseH);
+      paintHouse(i, isBottom, Math.round(block * i + block / 2 - houseW/2), top + houseH , houseW, houseH);
   }
 }
 

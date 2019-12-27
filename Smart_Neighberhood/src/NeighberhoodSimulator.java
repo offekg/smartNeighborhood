@@ -1,18 +1,15 @@
 package src;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Random;
+import java.util.HashMap;
 
-import javax.swing.JComponent;
+import src.ScenarioManager;
 
 import tau.smlab.syntech.executor.ControllerExecutor;
 import tau.smlab.syntech.executor.ControllerExecutorException;
 
-public class NeighberhoodSimulator extends JComponent {
-
-	private static final long serialVersionUID = 1L;
-
+public class NeighberhoodSimulator {
 	/**
 	 * 
 	 */
@@ -21,6 +18,7 @@ public class NeighberhoodSimulator extends JComponent {
 	Random random = new Random();
 	enum DayTimeMode {DAY, NIGHT};
 	int N = 4;
+	ScenarioManager scenario;
 
 	/***** Environment variables *****/
 	boolean sidewalkNorth;
@@ -48,8 +46,6 @@ public class NeighberhoodSimulator extends JComponent {
 
 	int sim_itter;
 	
-	// Queue<HashMap<String, Object>> scenarioQueue = new Queue<HashMap<String, Object>>();
-
 	public NeighberhoodSimulator() {
 		setEnvVarsToDefault();
 
@@ -78,22 +74,44 @@ public class NeighberhoodSimulator extends JComponent {
 		case 2: // manual mode.
 			updateEnvVarsFromClient(dataFromClient);
 			break;
-		case 3: // scenario number 1
+		case 3: // initiate scenario number 1
+			setEnvVarsToDefault();
+			scenario = new ScenarioManager(1);
 			break;
-		case 4: // scenario number 2
+		case 4: // initiate scenario number 2
+			setEnvVarsToDefault();
+			scenario = new ScenarioManager(2);
 			break;
-		case 5: // scenario number 3
+		case 5: // initiate scenario number 3
+			setEnvVarsToDefault();
+			scenario = new ScenarioManager(3);
 			break;
-		case 6: // scenario number 4
+		case 6: // initiate scenario number 4
+			setEnvVarsToDefault();
+			scenario = new ScenarioManager(4);
 			break;
-		case 7: // scenario number 5
+		case 7: // initiate scenario number 5
+			setEnvVarsToDefault();
+			scenario = new ScenarioManager(5);
 			break;
-		case 8: // scenario number 6
+		case 8: // initiate scenario number 6
+			setEnvVarsToDefault();
+			scenario = new ScenarioManager(6);
 			break;
-		case 9: // scenario number 7
+		case 9: // initiate scenario number 7
+			setEnvVarsToDefault();
+			scenario = new ScenarioManager(7);
 			break;
-		case 10: // scenario number 8
+		case 10: // initiate scenario number 8
+			setEnvVarsToDefault();
+			scenario = new ScenarioManager(8);
 			break;
+		case 11: // get scenario next state or random when scenario done
+			HashMap<String, Object> nextState = scenario.getNextState();
+			if (nextState != null)
+				updateEnvVarsFromClient(nextState);
+			else
+				randomNextState();
 		}
 
 		try {
