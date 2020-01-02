@@ -1,5 +1,5 @@
 
-spec SmartNeighborhood_sprint03_ver1
+spec SmartNeighborhood_sprint03_ver3
 
 // *** define type of day and night ***
 type DayTime = {DAY, NIGHT};
@@ -8,13 +8,18 @@ type DayTime = {DAY, NIGHT};
 //***Environment controlled input variables (sensors)***
 define N := 4;
 define crosswalkLoc := 1; //between can 1 and 2.
+define PEDEST_WALK_SIZE := (N*2 + 1);
+define NUM_LIGHTS := (N*2 - 2);
 
 env DayTime dayTime;
 env boolean energyEfficiencyMode;
 
-env boolean sidewalkNorth;
-env boolean sidewalkSouth;
-env boolean crossingCrosswalkNS;
+//env boolean sidewalkNorth;
+//env boolean sidewalkSouth;
+
+
+env boolean[PEDEST_WALK_SIZE] pedestrians;
+//env boolean crossingCrosswalkNS;
 //env boolean crossingCrosswalkSN;
 env boolean[N] garbageCansNorth;
 env boolean[N] garbageCansSouth;
@@ -23,10 +28,11 @@ env boolean[N] garbageCansSouth;
 //***System controlled output variables (lights)***
 sys boolean isCleaningN;
 sys boolean isCleaningS;
-sys boolean lightNorth;
-sys boolean lightSouth;
+//sys boolean lightNorth;
+//sys boolean lightSouth;
 sys Int(0..N) garbageTruckNorth_location; //location N means not on the street.
 sys Int(0..N) garbageTruckSouth_location;
+sys boolean[NUM_LIGHTS] lights;
 
 //***Assumptions on day and night***
 asm GF dayTime=DAY;
@@ -35,7 +41,9 @@ asm GF dayTime=NIGHT;
 
 //***Initial assumptions***
 //all pedestrian areas start empty
-asm !sidewalkNorth & !sidewalkSouth & !crossingCrosswalkNS; //& !crossingCrosswalkSN;
+//asm !sidewalkNorth & !sidewalkSouth & !crossingCrosswalkNS; //& !crossingCrosswalkSN;
+asm side_walk_starts_empty:
+	forall i in Int(0..(PEDEST_WALK_SIZE-1)). pedestrians[i] = false;
 asm all_cans_start_empty:
 	forall i in Int(0..(N-1)). ((!garbageCansNorth[i]) & !garbageCansSouth[i]);
 asm dayTime=DAY;
@@ -43,7 +51,7 @@ asm dayTime=DAY;
 
 
 //***Assumptions on pedestrian walking routes***
-asm G sidewalkNorth -> next(crossingCrosswalkNS);
+/*asm G sidewalkNorth -> next(crossingCrosswalkNS);
 asm G crossingCrosswalkNS -> next(sidewalkSouth);
 //asm G sidewalkSouth -> next(crossingCrosswalkSN); //sims in pool with no rail
 //asm G crossingCrosswalkSN -> next(sidewalkNorth);
@@ -51,7 +59,11 @@ asm GF !sidewalkNorth;
 asm GF !sidewalkSouth;
 asm GF !crossingCrosswalkNS; //& !crossingCrosswalkSN;
 //Pedestrians can't show up on the crosswalk with coming from the north side.
-asm G (next(crossingCrosswalkNS)->sidewalkNorth); 
+asm G (next(crossingCrosswalkNS)->sidewalkNorth); */
+
+//***Assumptions on pedestrian walking routes***
+asm GF !pedestrians[PEDEST_WALK_SIZE-1];  //the crosswalk will always empty eventually
+
 
 
 //***Assumptions on garbage cans***
@@ -81,10 +93,16 @@ asm G (garbageCansSouth[1] & (garbageTruckSouth_location != 1 | !isCleaningS)) -
 asm G (garbageCansSouth[2] & (garbageTruckSouth_location != 2 | !isCleaningS)) -> next(garbageCansSouth[2]);
 asm G (garbageCansSouth[3] & (garbageTruckSouth_location != 3 | !isCleaningS)) -> next(garbageCansSouth[3]);
 
-define crossing := crossingCrosswalkNS; //| crossingCrosswalkSN;	
+//define crossing := crossingCrosswalkNS; //| crossingCrosswalkSN;	
+define crossing := pedestrians[PEDEST_WALK_SIZE-1];
+define all_lights_off := (!lights[0] & !lights[1] & !lights[2] & !lights[3] & !lights[4] & !lights[5]);
+define all_lights_on := (lights[0] & lights[1] & lights[2] & lights[3] & lights[4] & lights[5]);
+
 
 //***Initial Guarantees***
-gar !lightNorth & !lightSouth;
+//gar !lightNorth & !lightSouth;
+//(forall i in Int(0..(NUM_LIGHTS-1)). lights[i] = false);
+asm all_lights_off;
 gar garbageTruckNorth_location = N;
 gar garbageTruckSouth_location = N;
 gar !isCleaningN;
@@ -196,16 +214,37 @@ weight 1
 
 
 //*** not in energy saving mode ***
-gar G (dayTime=NIGHT & !energyEfficiencyMode)-> (lightNorth & lightSouth);
-gar G (dayTime=DAY) -> (!lightNorth & !lightSouth);
+/*gar G (dayTime=NIGHT & !energyEfficiencyMode)-> (lightNorth & lightSouth);
+gar G (dayTime=DAY) -> (!lightNorth & !lightSouth);*/
+gar G (dayTime=NIGHT & !energyEfficiencyMode)-> all_lights_on;
+gar G (dayTime=DAY) -> all_lights_off;
 
 //*** in energy saving mode***
-gar G (!sidewalkNorth & energyEfficiencyMode) -> !lightNorth; 
+/*gar G (!sidewalkNorth & energyEfficiencyMode) -> !lightNorth; 
 gar G (!sidewalkSouth & energyEfficiencyMode)-> !lightSouth;
 
 gar G ((dayTime= NIGHT) & sidewalkNorth & energyEfficiencyMode) -> lightNorth; 
-gar G ((dayTime= NIGHT) & sidewalkSouth & energyEfficiencyMode) -> lightSouth;
+gar G ((dayTime= NIGHT) & sidewalkSouth & energyEfficiencyMode) -> lightSouth;*/
 
+predicate energyEfficientLightOFF(Int(0..(5)) i):
+	(energyEfficiencyMode & !pedestrians[i] & !pedestrians[i+1]) -> !lights[i];
+gar G energyEfficientLightOFF(0);
+gar G energyEfficientLightOFF(1);
+gar G energyEfficientLightOFF(2);
+gar G energyEfficientLightOFF(3);
+gar G energyEfficientLightOFF(4);
+gar G energyEfficientLightOFF(5);
+
+predicate energyEfficientLightON(Int(0..(5)) i):
+	((dayTime= NIGHT) & (pedestrians[i] | pedestrians[i+1]) & energyEfficiencyMode) -> lights[i];
+gar G energyEfficientLightON(0);
+gar G energyEfficientLightON(1);
+gar G energyEfficientLightON(2);
+gar G energyEfficientLightON(3);
+gar G energyEfficientLightON(4);
+gar G energyEfficientLightON(5);
+
+//old light logic with weights
 /* 
 gar G sidewalkNorth -> lightNorth;
 gar G sidewalkSouth -> lightSouth;
