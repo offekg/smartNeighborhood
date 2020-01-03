@@ -28,3 +28,7 @@ function startScenario(number) {
 function setMode(mode) {
   postToApi("mode=" + mode);
 }
+
+function sendPedestrian(){
+  //TODO: implement
+}
