@@ -3,8 +3,13 @@
 <head>
   <meta charset="utf-8">
   <title>Smart Neighborhood</title>
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-  <link rel="stylesheet" type="text/css" href="style.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+  <!-- Bootstrap core CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Design Bootstrap -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.10.1/css/mdb.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main role="main" class="container-fluid">
@@ -43,18 +48,40 @@
     </div>
     <div class="row">
       <div class="col-md-12  text-center" >
-        <button type="button" class="btn btn-primary m-2">Scenario 1</button>
-        <button type="button" class="btn btn-primary m-2">Scenario 2</button>
-        <button type="button" class="btn btn-primary m-2">Scenario 3</button>
-        <button type="button" class="btn btn-primary m-2">Scenario 4</button>
-        <button type="button" class="btn btn-primary m-2">Scenario 5</button>
-        <button type="button" class="btn btn-primary m-2">Scenario 6</button>
+        <div class="btn-group" data-toggle="buttons">
+          <label class="btn btn-primary btn-sm">
+            <input type="radio" name="scenario" id="manual"> Manual
+          </label>
+          <label class="btn btn-primary btn-sm active">
+            <input type="radio" name="scenario" id="automatic" checked> Automatic
+          </label>
+          <label class="btn btn-primary btn-sm">
+            <input type="radio" name="scenario" id="semi"> Semi
+          </label>
+        </div>
+        <div class="btn-group"
+        <div class="dropdown">
+          <button class="btn btn-sm btn-purple dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Scenarios
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" href="#">Scenario 1</a>
+            <a class="dropdown-item" href="#">Scenario 2</a>
+            <a class="dropdown-item" href="#">Scenario 3</a>
+          </div>
+        </div>
+      </div>
       </div>
     </div>
   </main>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-    <script type='text/javascript' src="canvas.js" ></script>
+  <!-- JQuery -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <!-- Bootstrap tooltips -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script>
+  <!-- Bootstrap core JavaScript -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <!-- MDB core JavaScript -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.10.1/js/mdb.min.js"></script>
+  <script type='text/javascript' src="canvas.js" ></script>
   </body>
 </html>
