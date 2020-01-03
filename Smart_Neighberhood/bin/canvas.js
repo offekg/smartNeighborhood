@@ -101,7 +101,6 @@ function animate() {
     if (isNextUpdated) {
       changeState();
     } else {
-      console.log("State not updated. Index:" + stateIndex);
       notFoundCount++;
       if (notFoundCount > 10) return;
     }
@@ -123,7 +122,6 @@ function changeState(isFirst) {
     $("#gb" + 0 + i).attr("disabled", currentState.environment.garbageCansNorth[i]);
     $("#gb" + 1 + i).attr("disabled", currentState.environment.garbageCansSouth[i]);
   }
-  console.log(currentState);
   isNextUpdated = false;
   stateIndex++;
 }
