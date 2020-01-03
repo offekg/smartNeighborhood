@@ -1,8 +1,10 @@
 package src;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.HashMap;
+import java.util.List;
 
 import src.ScenarioManager;
 
@@ -19,16 +21,18 @@ public class NeighberhoodSimulator {
 	enum DayTimeMode {DAY, NIGHT};
 	int N = 4;
 	ScenarioManager scenario;
+	int lastPedestrianId = 0;
 
 	/***** Environment variables *****/
-	boolean sidewalkNorth;
-	boolean sidewalkSouth;
-	boolean crossingCrosswalkNS;
+//	boolean sidewalkNorth;
+//	boolean sidewalkSouth;
+//	boolean crossingCrosswalkNS;
 	// boolean crossingCrosswalkSN;
 	boolean[] garbageCansNorth = new boolean[N];
 	boolean[] garbageCansSouth = new boolean[N];
 	DayTimeMode dayTime;
 	boolean energyEfficiencyMode;
+	List<Pedestrian> pedestrians = new ArrayList<>();
 	
 	/* dayTimrRelated */
 	int countHours = 0;
@@ -64,49 +68,49 @@ public class NeighberhoodSimulator {
 		case -1:
 			setEnvVarsToDefault();
 			break;
-		case 0: // random mode.
-			randomNextState();
-			break;
-		case 1: // semi-automatic mode.
-			randomNextState();
-			updateEnvVarsFromClient(dataFromClient);
-			break;
-		case 2: // manual mode.
-			updateEnvVarsFromClient(dataFromClient);
-			break;
-		case 3: // initiate scenario number 1
+		case 1: // initiate scenario number 1
 			setEnvVarsToDefault();
 			scenario = new ScenarioManager(1);
 			break;
-		case 4: // initiate scenario number 2
+		case 2: // initiate scenario number 2
 			setEnvVarsToDefault();
 			scenario = new ScenarioManager(2);
 			break;
-		case 5: // initiate scenario number 3
+		case 3: // initiate scenario number 3
 			setEnvVarsToDefault();
 			scenario = new ScenarioManager(3);
 			break;
-		case 6: // initiate scenario number 4
+		case 4: // initiate scenario number 4
 			setEnvVarsToDefault();
 			scenario = new ScenarioManager(4);
 			break;
-		case 7: // initiate scenario number 5
+		case 5: // initiate scenario number 5
 			setEnvVarsToDefault();
 			scenario = new ScenarioManager(5);
 			break;
-		case 8: // initiate scenario number 6
+		case 6: // initiate scenario number 6
 			setEnvVarsToDefault();
 			scenario = new ScenarioManager(6);
 			break;
-		case 9: // initiate scenario number 7
+		case 7: // initiate scenario number 7
 			setEnvVarsToDefault();
 			scenario = new ScenarioManager(7);
 			break;
-		case 10: // initiate scenario number 8
+		case 8: // initiate scenario number 8
 			setEnvVarsToDefault();
 			scenario = new ScenarioManager(8);
 			break;
-		case 11: // get scenario next state or random when scenario done
+		case 9: // random mode.
+			randomNextState();
+			break;
+		case 10: // semi-automatic mode.
+			randomNextState();
+			updateEnvVarsFromClient(dataFromClient);
+			break;
+		case 11: // manual mode.
+			updateEnvVarsFromClient(dataFromClient);
+			break;
+		case 100: // get scenario next state or random when scenario done
 			HashMap<String, Object> nextState = scenario.getNextState();
 			if (nextState != null)
 				updateEnvVarsFromClient(nextState);
@@ -130,9 +134,9 @@ public class NeighberhoodSimulator {
 		// Instantiate a new controller executor
 		executor = new ControllerExecutor(true, false);
 		
-		sidewalkNorth = false;
-		sidewalkSouth = false;
-		crossingCrosswalkNS = false;
+//		sidewalkNorth = false;
+//		sidewalkSouth = false;
+//		crossingCrosswalkNS = false;
 		// crossingCrosswalkSN;
 		for (int i = 0; i < N; i++) {
 			garbageCansNorth[i] = false;
@@ -140,6 +144,7 @@ public class NeighberhoodSimulator {
 		}
 		dayTime = DayTimeMode.DAY;
 		energyEfficiencyMode = false;
+		pedestrians = new ArrayList<>();
 		
 		sim_itter = 0;
 	}
@@ -151,9 +156,9 @@ public class NeighberhoodSimulator {
 			executor.setInputValue(String.format("garbageCansNorth[%d]", i), String.valueOf(garbageCansNorth[i]));
 			executor.setInputValue(String.format("garbageCansSouth[%d]", i), String.valueOf(garbageCansSouth[i]));
 		}
-		executor.setInputValue("sidewalkSouth", String.valueOf(sidewalkSouth));
-		executor.setInputValue("sidewalkNorth", String.valueOf(sidewalkNorth));
-		executor.setInputValue("crossingCrosswalkNS", String.valueOf(crossingCrosswalkNS));
+//		executor.setInputValue("sidewalkSouth", String.valueOf(sidewalkSouth));
+//		executor.setInputValue("sidewalkNorth", String.valueOf(sidewalkNorth));
+//		executor.setInputValue("crossingCrosswalkNS", String.valueOf(crossingCrosswalkNS));
 		executor.setInputValue("dayTime", String.valueOf(dayTime));
 		executor.setInputValue("energyEfficiencyMode", String.valueOf(energyEfficiencyMode));
 
@@ -194,20 +199,25 @@ public class NeighberhoodSimulator {
 			}
 		}
 
-		if (crossingCrosswalkNS)// || random.nextInt(1) == 0) // 1:5 chance of pedestrian on south sidewalk
-			sidewalkSouth = true;
-		else
-			sidewalkSouth = false;
-
-		if (sidewalkNorth == true)
-			crossingCrosswalkNS = true;
-		else
-			crossingCrosswalkNS = false;
-
-		if (sidewalkSouth == false && crossingCrosswalkNS == false && random.nextInt(6) == 0) // 1:10 chance of pedestrian on north sidewalk
-			sidewalkNorth = true;
-		else
-			sidewalkNorth = false;
+//		if (crossingCrosswalkNS)// || random.nextInt(1) == 0) // 1:5 chance of pedestrian on south sidewalk
+//			sidewalkSouth = true;
+//		else
+//			sidewalkSouth = false;
+//
+//		if (sidewalkNorth == true)
+//			crossingCrosswalkNS = true;
+//		else
+//			crossingCrosswalkNS = false;
+//
+//		if (sidewalkSouth == false && crossingCrosswalkNS == false && random.nextInt(6) == 0) // 1:10 chance of pedestrian on north sidewalk
+//			sidewalkNorth = true;
+//		else
+//			sidewalkNorth = false;
+		if (random.nextInt(5) == 0) {
+			Pedestrian p = new Pedestrian(++lastPedestrianId, random.nextBoolean());
+			pedestrians.add(p);
+		}
+		
 		
 		if (countHours != 0 && countHours % 12 == 0) {
 			dayTime = DayTimeMode.values()[(dayTime.ordinal() + 1) % 2];
@@ -228,9 +238,9 @@ public class NeighberhoodSimulator {
 	private HashMap<String, HashMap<String, Object>> getSpectraVarsAsDict() {
 		HashMap<String, Object> current_environment_state = new HashMap<>();
 		current_environment_state.put("isNight",dayTime == DayTimeMode.NIGHT);
-		current_environment_state.put("sidewalkNorth", sidewalkNorth);
-		current_environment_state.put("sidewalkSouth", sidewalkSouth);
-		current_environment_state.put("crossingCrosswalkNS", crossingCrosswalkNS);
+//		current_environment_state.put("sidewalkNorth", sidewalkNorth);
+//		current_environment_state.put("sidewalkSouth", sidewalkSouth);
+//		current_environment_state.put("crossingCrosswalkNS", crossingCrosswalkNS);
 		// current_environment_state.put("crossingCrosswalkSN", crossingCrosswalkSN);
 		current_environment_state.put("garbageCansNorth", Arrays.toString(garbageCansNorth));
 		current_environment_state.put("garbageCansSouth", Arrays.toString(garbageCansSouth));
@@ -256,15 +266,15 @@ public class NeighberhoodSimulator {
 		
 		for (String var : dataFromClient.keySet()) {
 			switch (var) {
-			case "sidewalkNorth":
-				sidewalkNorth = (boolean) dataFromClient.get("sidewalkNorth");
-				break;
-			case "sidewalkSouth":
-				sidewalkSouth = (boolean) dataFromClient.get("sidewalkSouth");
-				break;
-			case "crossingCrosswalkNS":
-				crossingCrosswalkNS = (boolean) dataFromClient.get("crossingCrosswalkNS");
-				break;
+//			case "sidewalkNorth":
+//				sidewalkNorth = (boolean) dataFromClient.get("sidewalkNorth");
+//				break;
+//			case "sidewalkSouth":
+//				sidewalkSouth = (boolean) dataFromClient.get("sidewalkSouth");
+//				break;
+//			case "crossingCrosswalkNS":
+//				crossingCrosswalkNS = (boolean) dataFromClient.get("crossingCrosswalkNS");
+//				break;
 //			case "crossingCrosswalkSN":
 //				crossingCrosswalkSN = (boolean) dataFromClient.get("crossingCrosswalkSN");
 //				break;
