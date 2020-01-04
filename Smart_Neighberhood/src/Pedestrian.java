@@ -7,6 +7,7 @@ public class Pedestrian {
 	int id;
 	int position;
 	boolean isInTheNorth;
+	boolean isOnCrosswalk = false;
 	boolean allowedToCross = true;
 	
 	Random randomMoving = new Random();
@@ -18,13 +19,21 @@ public class Pedestrian {
 	}
 
 	public void move(int isFreezeCrosswalk) {
-		int nextPosition = position - (randomMoving.nextInt(3) - 1);
-		if (allowedToCross) {
-			if (!(isFreezeCrosswalk == 0) && (nextPosition == 1 || nextPosition == 2)) {
-				int shouldCross = randomMoving.nextInt(2);
-				if (shouldCross == 1) {
-					cross();
-					allowedToCross = false;
+		int nextPosition;
+		if (isOnCrosswalk) {
+			isOnCrosswalk = false;
+			isInTheNorth = !isInTheNorth; //toggle between north and south
+			nextPosition = randomMoving.nextInt(2) + 1; //from crosswalk can reach position 1 or 2;
+		}
+		else {
+			nextPosition = position - (randomMoving.nextInt(3) - 1);
+			if (allowedToCross) {
+				if (!(isFreezeCrosswalk == 0) && (nextPosition == 1 || nextPosition == 2)) {
+					int shouldCross = randomMoving.nextInt(2);
+					if (shouldCross == 1) {
+						cross();
+						allowedToCross = false;
+					}
 				}
 			}
 		}
