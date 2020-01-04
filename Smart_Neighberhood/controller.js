@@ -13,20 +13,20 @@ function postHttpReqest(url, content) {
 }
 
 function postToApi(content) {
-  postHttpReqest("/api", content);
+  postHttpReqest("/api", "data: " + content);
 }
 
 function setGarbage(index, isBottom) {
-  let parameter = isBottom ? "garbageCansSouth=" : "garbageCansNorth="
-  postToApi(parameter + index);
+  let parameter = isBottom ? "garbageCansSouth:" : "garbageCansNorth:"
+  postToApi("{" + parameter + index + "}");
 }
 
 function startScenario(number) {
-  postHttpReqest("api/scenario", "scenario=" + number);
+  postHttpReqest("api/scenario", "data: scenario:" + number);
 }
 
 function setMode(mode) {
-  postToApi("mode=" + mode);
+  postToApi("{mode:" + mode + "}");
 }
 
 function sendPedestrian(){

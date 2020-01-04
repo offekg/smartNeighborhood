@@ -1,34 +1,52 @@
 package src;
 
+import java.util.HashMap;
 import java.util.Random;;
 
 public class Pedestrian {
 	int id;
 	int position;
 	boolean isInTheNorth;
+	boolean allowedToCross = true;
 	
 	Random randomMoving = new Random();
 	
-	public Pedestrian(int id, boolean isInTheNorth) {
+	public Pedestrian(int id, int position, boolean isInTheNorth) {
 		this.id = id;
-		this.position = -1;
+		this.position = position;
 		this.isInTheNorth = isInTheNorth;
 	}
 
-	public boolean move(boolean freezeCrosswalk) {
-		int nextPosition = randomMoving.nextInt(2) - position - 1;
-		if (nextPosition == -1 || nextPosition == 4)
-			return false; // means that this pedestrian goes inactive.
-		if (!freezeCrosswalk && (nextPosition == 1 || nextPosition == 2)) {
-			int shouldCross = randomMoving.nextInt(1);
-			if (shouldCross == 1)
-				cross();
+	public void move(int isFreezeCrosswalk) {
+		int nextPosition = position - (randomMoving.nextInt(3) - 1);
+		if (allowedToCross) {
+			if (!(isFreezeCrosswalk == 0) && (nextPosition == 1 || nextPosition == 2)) {
+				int shouldCross = randomMoving.nextInt(2);
+				if (shouldCross == 1) {
+					cross();
+					allowedToCross = false;
+				}
+			}
 		}
 		position = nextPosition;
-		return true;
 	}
 	
 	public void cross() {
 		isInTheNorth = !isInTheNorth;
+	}
+	
+	public boolean isPedestrianExists() {
+		if (this.position < 0 || this.position > 3)
+			return false;
+		return true;
+	}
+	
+	public HashMap<String, Object> getPedestrianState() {
+		HashMap<String, Object> pedestrianData = new HashMap<String, Object>();
+		pedestrianData.put("id", this.id);
+		pedestrianData.put("position", this.position);
+		pedestrianData.put("isInNorth", this.isInTheNorth);
+		
+		return pedestrianData;
 	}
 }

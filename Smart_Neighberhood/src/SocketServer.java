@@ -17,10 +17,26 @@ import java.io.BufferedOutputStream;
 import java.lang.ClassNotFoundException;
 import java.nio.charset.StandardCharsets;
 
-
 public class SocketServer {
 	private static enum messageTypes {
 		INFO, ERROR, SUCCESS, WAITING
+	}
+	
+	private static enum userMode {
+		AUTOMATIC, SEMI, MANUAL, SCENARIO;
+		
+		private int getModeScenarioNum() {
+			switch(this) {
+			case AUTOMATIC:
+				return 9;
+			case SEMI:
+				return 10;
+			case MANUAL:
+				return 11;
+			default:
+				return 100;
+			}
+		}
 	}
 
 	private static ServerSocket server;
@@ -45,12 +61,13 @@ public class SocketServer {
 	private static String outputError = "Encountered an issue with response to cloent";
 
 	private static int houseCount = 4;
-	private static String[] envVars = new String[] { "sidewalkNorth", "sidewalkSouth", "crossingCrosswalkNS",
-			"crossingCrosswalkSN", "garbageCansNorth", "garbageCansSouth", "dayTime", "energyEfficiencyMode" };
-	private static String[] sysVars = new String[] { "isCleaningN", "isCleaningS", "lightNorth", "lightSouth",
+	private static String[] envVars = new String[] { "pedestrian", "garbageCansNorth", "garbageCansSouth", "dayTime",
+			"energyEfficiencyMode", "mode", "scenario" };
+	private static String[] sysVars = new String[] { "isCleaningN", "isCleaningS", "lights",
 			"garbageTruckNorth_location", "garbageTruckSouth_location" };
 
 	private static String input = "";
+	private static userMode mode = userMode.MANUAL;
 
 	public static void main(String args[]) throws IOException, ClassNotFoundException {
 		server = new ServerSocket(port);
@@ -72,18 +89,32 @@ public class SocketServer {
 			String path = parse.nextToken().toLowerCase(); // we get file requested
 
 			if (path.contains("api")) {
-				if ((Boolean) dataDict.get("data_exists") == true)
-					createAndSendResponseToClient(socket, spectraVarsToJson(1, dataDict).toString(),
+				if ((Boolean) dataDict.get("data_exists") == true) {
+					if (dataDict.containsKey("mode"))
+						setNewUserModeAccordingToUserRequest((String) dataDict.get("mode"));
+					createAndSendResponseToClient(socket, spectraVarsToJson(mode.getModeScenarioNum(), dataDict).toString(),
 							(Boolean) dataDict.get("isClientChrome"));
+				}
 				else
-					createAndSendResponseToClient(socket, spectraVarsToJson(0, null).toString(),
+					createAndSendResponseToClient(socket, spectraVarsToJson(mode.getModeScenarioNum(), null).toString(),
 							(Boolean) dataDict.get("isClientChrome"));
-			} else if (path.contains("api/scenario")) {
-				// TODO: handle scenarios.
-			} else if (path.contains("api/reset")) {
-				createAndSendResponseToClient(socket, spectraVarsToJson(-1, null).toString(),
+			}
+
+			else if (path.contains("api/scenario")) {
+				int scenarioiNum = Integer.parseInt((String) dataDict.get("scenario"));
+				createAndSendResponseToClient(socket, spectraVarsToJson(scenarioiNum, null).toString(),
 						(Boolean) dataDict.get("isClientChrome"));
-			} else
+				mode = userMode.SCENARIO;
+				colorMe(messageTypes.INFO, "Switching to scenario: " + scenarioiNum, false);
+			}
+
+			else if (path.contains("api/reset")) {
+				setNewUserModeAccordingToUserRequest("manual");
+				createAndSendResponseToClient(socket, spectraVarsToJson(mode.getModeScenarioNum(), null).toString(),
+						(Boolean) dataDict.get("isClientChrome"));
+			}
+
+			else
 				newConnectionFound(socket, parse, path);
 
 			ois.close();
@@ -156,6 +187,21 @@ public class SocketServer {
 			System.out.println(ConsoleColors.PURPLE_BRIGHT + pleasePaintMe + ConsoleColors.RESET);
 			break;
 		}
+	}
+	
+	private static void setNewUserModeAccordingToUserRequest(String userRequest) {
+		switch (userRequest) {
+		case "automatic":
+			mode = userMode.AUTOMATIC;
+			break;
+		case "semi":
+			mode = userMode.SEMI;
+			break;
+		default:
+			//mode = userMode.MANUAL;
+		}
+		
+		colorMe(messageTypes.INFO, "Switching to mode: " + mode, false);
 	}
 
 	/*********************************************************************************/
@@ -230,8 +276,9 @@ public class SocketServer {
 		for (String s : splitData) {
 			if (s.startsWith("data:")) {
 				try {
-					js = new JSONObject(s.split("data:")[1]);
+					js = new JSONObject(s.split("data: ")[1]);
 				} catch (JSONException e) {
+					System.out.println("Could not load data to JSON");
 					return null;
 				}
 			}
@@ -271,21 +318,28 @@ public class SocketServer {
 
 	private static HashMap<String, Object> parseDataToEnvVars(JSONObject data) {
 		HashMap<String, Object> envVarsValues = new HashMap<>();
-
+		
 		for (String envVar : envVars) {
-			try {
-				Object varValue = data.get(envVar);
-
-				if (envVar == "garbageCansNorth" || envVar == "garbageCansSouth") {
-					envVarsValues.put(envVar, (Boolean[]) varValue);
-				} else {
-					envVarsValues.put(envVar, (Boolean) varValue);
+			if (data.has(envVar)) {
+				try {
+					Object varValue = data.get(envVar);
+					if (envVar == "pedestrian")
+						envVarsValues.put("pedestrian", (Object[]) varValue);
+					else if (envVar == "garbageCansNorth" || envVar == "garbageCansSouth" || envVar == "scenario") {
+						envVarsValues.put(envVar, (int) varValue);
+					} else if (envVar == "mode") {
+						envVarsValues.put(envVar, (String) varValue);
+						
+					}
+						else {
+						envVarsValues.put(envVar, (Boolean) varValue);
+					}
+				} catch (Exception e) {
+					colorMe(messageTypes.ERROR, notWellFormattedMessage, false);
+					colorMe(messageTypes.ERROR, issueWithMessage + envVar, false);
+					envVarsValues = new HashMap<>();
+					break;
 				}
-			} catch (Exception e) {
-				colorMe(messageTypes.ERROR, notWellFormattedMessage, false);
-				colorMe(messageTypes.ERROR, issueWithMessage + envVar, false);
-				envVarsValues = new HashMap<>();
-				break;
 			}
 		}
 
