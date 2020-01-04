@@ -50,7 +50,8 @@ public class NeighberhoodSimulator {
 	/***** System variables *****/
 	boolean isCleaningN;
 	boolean isCleaningS;
-	String[] lights;
+	boolean[] lightsNorth = new boolean[N - 1];
+	boolean[] lightsSouth = new boolean[N - 1];
 //	boolean lightNorth;
 //	boolean lightSouth;
 	int garbageTruckNorth_location; // location N means not on the street.
@@ -177,8 +178,23 @@ public class NeighberhoodSimulator {
 //		executor.setInputValue("crossingCrosswalkNS", String.valueOf(crossingCrosswalkNS));
 		executor.setInputValue("dayTime", String.valueOf(dayTime));
 		executor.setInputValue("energyEfficiencyMode", String.valueOf(energyEfficiencyMode));
-		// TODO: how to update a new pedestrian into spectra?
-
+		
+		//first set all spectra pedestrian spaces to false, and then update from all pedestrians
+		for (int i = 0; i < N*2 + 1; i++) {
+			executor.setInputValue(String.format("pedestrians[%d]", i), "false");
+		}
+		for (Pedestrian pedestrian : pedestrians) {
+			if (pedestrian.isOnCrosswalk) {
+				executor.setInputValue(String.format("pedestrians[%d]", N*2), "true");
+			}
+			else if (pedestrian.position != -1 && pedestrian.position != 4){
+				if(pedestrian.isInTheNorth)
+					executor.setInputValue(String.format("pedestrians[%d]", pedestrian.position), "true");
+				else
+					executor.setInputValue(String.format("pedestrians[%d]", pedestrian.position + N), "true");
+			}
+		}
+		
 		System.out.println("updating to spectra");
 		executor.updateState(true, true);
 	}
@@ -188,10 +204,14 @@ public class NeighberhoodSimulator {
 
 		isCleaningN = Boolean.parseBoolean(executor.getCurValue("isCleaningN"));
 		isCleaningS = Boolean.parseBoolean(executor.getCurValue("isCleaningS"));
-//		TODO: Add lights from spectra
 //		System.out.println(executor.getCurValue("lights[0]"));
 //		lightNorth = Boolean.parseBoolean(executor.getCurValue("lightNorth"));
 //		lightSouth = Boolean.parseBoolean(executor.getCurValue("lightSouth"));
+		for (int i = 0; i < N - 1; i++) {
+			lightsNorth[i] = Boolean.parseBoolean(executor.getCurValue(String.format("lights[%d]",i)));
+			lightsSouth[i] = Boolean.parseBoolean(executor.getCurValue(String.format("lights[%d]",i + N-1)));
+		}
+		
 		garbageTruckNorth_location = Integer.parseInt(executor.getCurValue("garbageTruckNorth_location"));
 		garbageTruckSouth_location = Integer.parseInt(executor.getCurValue("garbageTruckSouth_location"));
 	}
@@ -305,7 +325,8 @@ public class NeighberhoodSimulator {
 		HashMap<String, Object> current_system_state = new HashMap<>();
 		current_system_state.put("isCleaningN", isCleaningN);
 		current_system_state.put("isCleaningS", isCleaningS);
-//		TODO: add lights with key "lights"
+		current_system_state.put("lightsNorth", lightsNorth);
+		current_system_state.put("lightsSouth", lightsSouth);
 //		current_system_state.put("lightNorth", lightNorth);
 //		current_system_state.put("lightSouth", lightSouth);
 		current_system_state.put("garbageTruckNorth_location", garbageTruckNorth_location);

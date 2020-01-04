@@ -18,7 +18,7 @@ env boolean energyEfficiencyMode;
 //env boolean sidewalkSouth;
 
 
-env boolean[PEDEST_WALK_SIZE] pedestrians;
+env boolean[PEDEST_WALK_SIZE] pedestrians;  // pedestrians[PEDEST_WALK_SIZE-1] => someone on the crosswalk
 //env boolean crossingCrosswalkNS;
 //env boolean crossingCrosswalkSN;
 env boolean[N] garbageCansNorth;
