@@ -267,7 +267,11 @@ public class NeighberhoodSimulator {
 //		else
 //			sidewalkNorth = false;
 		if (random.nextInt(5) == 0) {
-			addNewPedestrian(random.nextInt(2) * 3, random.nextBoolean());
+			int startPosition = random.nextInt(2);
+			if (startPosition == 0)
+				addNewPedestrian(-1, random.nextBoolean());
+			else
+				addNewPedestrian(4, random.nextBoolean());
 		}
 
 		if (countHours != 0 && countHours % 12 == 0) {
@@ -301,7 +305,7 @@ public class NeighberhoodSimulator {
 		HashMap<String, Object> current_system_state = new HashMap<>();
 		current_system_state.put("isCleaningN", isCleaningN);
 		current_system_state.put("isCleaningS", isCleaningS);
-		current_system_state.put("lights", Arrays.toString(lights));
+//		TODO: add lights with key "lights"
 //		current_system_state.put("lightNorth", lightNorth);
 //		current_system_state.put("lightSouth", lightSouth);
 		current_system_state.put("garbageTruckNorth_location", garbageTruckNorth_location);

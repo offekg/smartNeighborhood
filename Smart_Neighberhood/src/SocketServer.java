@@ -21,12 +21,12 @@ public class SocketServer {
 	private static enum messageTypes {
 		INFO, ERROR, SUCCESS, WAITING
 	}
-	
+
 	private static enum userMode {
 		AUTOMATIC, SEMI, MANUAL, SCENARIO;
-		
+
 		private int getModeScenarioNum() {
-			switch(this) {
+			switch (this) {
 			case AUTOMATIC:
 				return 9;
 			case SEMI:
@@ -87,35 +87,38 @@ public class SocketServer {
 			StringTokenizer parse = new StringTokenizer(input);
 			String method = parse.nextToken().toUpperCase(); // we get the HTTP method of the client
 			String path = parse.nextToken().toLowerCase(); // we get file requested
-
-			if (path.contains("api/reset")) {
-				setNewUserModeAccordingToUserRequest("manual");
-				createAndSendResponseToClient(socket, spectraVarsToJson(mode.getModeScenarioNum(), null).toString(),
-						(Boolean) dataDict.get("isClientChrome"));
-			}
-
-			else if (path.contains("api/scenario")) {
-				int scenarioiNum = (int) dataDict.get("scenario");
-				createAndSendResponseToClient(socket, spectraVarsToJson(scenarioiNum, null).toString(),
-						(Boolean) dataDict.get("isClientChrome"));
-				mode = userMode.SCENARIO;
-				colorMe(messageTypes.INFO, "Switching to scenario: " + scenarioiNum, false);
-			}
-
-			else if (path.contains("api")) {
-				if ((Boolean) dataDict.get("data_exists") == true) {
-					if (dataDict.containsKey("mode"))
-						setNewUserModeAccordingToUserRequest((String) dataDict.get("mode"));
-					createAndSendResponseToClient(socket, spectraVarsToJson(mode.getModeScenarioNum(), dataDict).toString(),
-							(Boolean) dataDict.get("isClientChrome"));
-				}
-				else
-					createAndSendResponseToClient(socket, spectraVarsToJson(mode.getModeScenarioNum(), null).toString(),
-							(Boolean) dataDict.get("isClientChrome"));
-			}
 			
-			else
-				newConnectionFound(socket, parse, path);
+			if (method.equals("GET")) {
+				if (path.contains("api")) {
+					if ((Boolean) dataDict.get("data_exists") == true) {
+						createAndSendResponseToClient(socket,
+								spectraVarsToJson(mode.getModeScenarioNum(), dataDict).toString(),
+								(Boolean) dataDict.get("isClientChrome"));
+					} else
+						createAndSendResponseToClient(socket,
+								spectraVarsToJson(mode.getModeScenarioNum(), null).toString(),
+								(Boolean) dataDict.get("isClientChrome"));
+				} else
+					newConnectionFound(socket, parse, path);
+			} else {
+				if (path.contains("api/reset")) {
+					setNewUserModeAccordingToUserRequest("manual");
+				}
+
+				else if (path.contains("api/scenario")) {
+					int scenarioiNum = (int) dataDict.get("scenario");
+					spectraVarsToJson(scenarioiNum, null);
+					mode = userMode.SCENARIO;
+					colorMe(messageTypes.INFO, "Switching to scenario: " + scenarioiNum, false);
+				}
+
+				else if (path.contains("api")) {
+					if ((Boolean) dataDict.get("data_exists") == true) {
+						if (dataDict.containsKey("mode"))
+							setNewUserModeAccordingToUserRequest((String) dataDict.get("mode"));
+					}
+				}
+			}
 
 			ois.close();
 			socket.close();
@@ -188,7 +191,7 @@ public class SocketServer {
 			break;
 		}
 	}
-	
+
 	private static void setNewUserModeAccordingToUserRequest(String userRequest) {
 		switch (userRequest) {
 		case "automatic":
@@ -198,9 +201,9 @@ public class SocketServer {
 			mode = userMode.SEMI;
 			break;
 		default:
-			//mode = userMode.MANUAL;
+//			mode = userMode.MANUAL;
 		}
-		
+
 		colorMe(messageTypes.INFO, "Switching to mode: " + mode, false);
 	}
 
@@ -318,7 +321,7 @@ public class SocketServer {
 
 	private static HashMap<String, Object> parseDataToEnvVars(JSONObject data) {
 		HashMap<String, Object> envVarsValues = new HashMap<>();
-		
+
 		for (String envVar : envVars) {
 			if (data.has(envVar)) {
 				try {
@@ -329,9 +332,8 @@ public class SocketServer {
 						envVarsValues.put(envVar, (int) varValue);
 					} else if (envVar == "mode") {
 						envVarsValues.put(envVar, (String) varValue);
-						
-					}
-						else {
+
+					} else {
 						envVarsValues.put(envVar, (Boolean) varValue);
 					}
 				} catch (Exception e) {
