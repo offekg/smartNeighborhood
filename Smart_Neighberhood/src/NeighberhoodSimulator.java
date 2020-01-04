@@ -325,8 +325,8 @@ public class NeighberhoodSimulator {
 		HashMap<String, Object> current_system_state = new HashMap<>();
 		current_system_state.put("isCleaningN", isCleaningN);
 		current_system_state.put("isCleaningS", isCleaningS);
-		current_system_state.put("lightsNorth", lightsNorth);
-		current_system_state.put("lightsSouth", lightsSouth);
+		current_system_state.put("lightsNorth", Arrays.toString(lightsNorth));
+		current_system_state.put("lightsSouth", Arrays.toString(lightsSouth));
 //		current_system_state.put("lightNorth", lightNorth);
 //		current_system_state.put("lightSouth", lightSouth);
 		current_system_state.put("garbageTruckNorth_location", garbageTruckNorth_location);
