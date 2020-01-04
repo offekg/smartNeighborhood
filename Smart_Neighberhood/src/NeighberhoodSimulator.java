@@ -64,7 +64,6 @@ public class NeighberhoodSimulator {
 
 		try {
 			updateEnvVarsInSpectra();
-
 			updateSystemVarsFromSpectra();
 		} catch (ControllerExecutorException e) {
 			// TODO: handle it gracefully.
@@ -210,12 +209,12 @@ public class NeighberhoodSimulator {
 	private void moveAllPedestrians() {
 		if (pedestrians.isEmpty())
 			return;
-		
+
 		Iterator<Pedestrian> iter = pedestrians.iterator();
 		lock.lock();
 		while (iter.hasNext()) {
 			Pedestrian p = iter.next();
-			
+
 			if (!p.isPedestrianExists())
 				iter.remove();
 			else
@@ -316,9 +315,9 @@ public class NeighberhoodSimulator {
 	}
 
 	private void updateEnvVarsFromClient(HashMap<String, Object> dataFromClient) {
-		if (dataFromClient== null)
+		if (dataFromClient == null)
 			return;
-				
+
 		for (String var : dataFromClient.keySet()) {
 			switch (var) {
 //			case "sidewalkNorth":
@@ -335,13 +334,21 @@ public class NeighberhoodSimulator {
 //				break;
 			case "pedestrian":
 				Object[] pedestrian = (Object[]) dataFromClient.get("pedestrian");
-				addNewPedestrian((int)pedestrian[0], (boolean)pedestrian[1]);
+				addNewPedestrian((int) pedestrian[0], (boolean) pedestrian[1]);
 				break;
 			case "garbageCansNorth":
-				garbageCansNorth[(int) dataFromClient.get("garbageCansNorth")] = true;
+				try {
+					garbageCansNorth[(int) dataFromClient.get("garbageCansNorth")] = true;
+				} catch (ClassCastException e) {
+					garbageCansNorth = (boolean[]) dataFromClient.get("garbageCansNorth");
+				}
 				break;
 			case "garbageCansSouth":
-				garbageCansNorth[(int) dataFromClient.get("garbageCansSouth")] = true;
+				try {
+					garbageCansSouth[(int) dataFromClient.get("garbageCansSouth")] = true;
+				} catch (ClassCastException e) {
+					garbageCansSouth = (boolean[]) dataFromClient.get("garbageCansSouth");
+				}
 				break;
 			case "dayTime":
 				dayTime = (DayTimeMode) dataFromClient.get("dayTime");

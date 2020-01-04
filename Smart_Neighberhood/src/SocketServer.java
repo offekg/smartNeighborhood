@@ -88,7 +88,21 @@ public class SocketServer {
 			String method = parse.nextToken().toUpperCase(); // we get the HTTP method of the client
 			String path = parse.nextToken().toLowerCase(); // we get file requested
 
-			if (path.contains("api")) {
+			if (path.contains("api/reset")) {
+				setNewUserModeAccordingToUserRequest("manual");
+				createAndSendResponseToClient(socket, spectraVarsToJson(mode.getModeScenarioNum(), null).toString(),
+						(Boolean) dataDict.get("isClientChrome"));
+			}
+
+			else if (path.contains("api/scenario")) {
+				int scenarioiNum = (int) dataDict.get("scenario");
+				createAndSendResponseToClient(socket, spectraVarsToJson(scenarioiNum, null).toString(),
+						(Boolean) dataDict.get("isClientChrome"));
+				mode = userMode.SCENARIO;
+				colorMe(messageTypes.INFO, "Switching to scenario: " + scenarioiNum, false);
+			}
+
+			else if (path.contains("api")) {
 				if ((Boolean) dataDict.get("data_exists") == true) {
 					if (dataDict.containsKey("mode"))
 						setNewUserModeAccordingToUserRequest((String) dataDict.get("mode"));
@@ -99,21 +113,7 @@ public class SocketServer {
 					createAndSendResponseToClient(socket, spectraVarsToJson(mode.getModeScenarioNum(), null).toString(),
 							(Boolean) dataDict.get("isClientChrome"));
 			}
-
-			else if (path.contains("api/scenario")) {
-				int scenarioiNum = Integer.parseInt((String) dataDict.get("scenario"));
-				createAndSendResponseToClient(socket, spectraVarsToJson(scenarioiNum, null).toString(),
-						(Boolean) dataDict.get("isClientChrome"));
-				mode = userMode.SCENARIO;
-				colorMe(messageTypes.INFO, "Switching to scenario: " + scenarioiNum, false);
-			}
-
-			else if (path.contains("api/reset")) {
-				setNewUserModeAccordingToUserRequest("manual");
-				createAndSendResponseToClient(socket, spectraVarsToJson(mode.getModeScenarioNum(), null).toString(),
-						(Boolean) dataDict.get("isClientChrome"));
-			}
-
+			
 			else
 				newConnectionFound(socket, parse, path);
 

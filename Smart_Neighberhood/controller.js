@@ -22,7 +22,7 @@ function setGarbage(index, isBottom) {
 }
 
 function startScenario(number) {
-  postHttpReqest("api/scenario", "data: scenario:" + number);
+  postHttpReqest("api/scenario", "data: {scenario:" + number + "}");
 }
 
 function setMode(mode) {
