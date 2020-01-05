@@ -116,6 +116,8 @@ public class SocketServer {
 					if ((Boolean) dataDict.get("data_exists") == true) {
 						if (dataDict.containsKey("mode"))
 							setNewUserModeAccordingToUserRequest((String) dataDict.get("mode"));
+						else
+							sim.updateEnvVarsFromClient(dataDict);
 					}
 				}
 			}
@@ -201,7 +203,7 @@ public class SocketServer {
 			mode = userMode.SEMI;
 			break;
 		default:
-//			mode = userMode.MANUAL;
+			mode = userMode.MANUAL;
 		}
 
 		colorMe(messageTypes.INFO, "Switching to mode: " + mode, false);

@@ -26,7 +26,7 @@ public class Pedestrian {
 		int nextPosition;
 		if (isOnCrosswalk) {
 			cross();
-			nextPosition = randomMoving.nextInt() + 1;
+			nextPosition = randomMoving.nextInt(2) + 1;
 		} else {
 			if (!isAppeared) {
 				if (position == -1)
@@ -34,18 +34,17 @@ public class Pedestrian {
 				else
 					nextPosition = 3;
 				isAppeared = true;
-			}
-			else {
-				nextPosition = position - (randomMoving.nextInt(3) - 1);
-				if (allowedToCross) {
-					if (!(isFreezeCrosswalk == 0 || isFreezeCrosswalk == 1)
-							&& (nextPosition == 1 || nextPosition == 2)) {
-						int shouldCross = randomMoving.nextInt(2);
-						if (shouldCross == 1) {
-							isOnCrosswalk = true;
-						}
-					}
-				}
+			} else {
+				if (allowedToCross && (position == 1 || position == 2)
+						&& !(isFreezeCrosswalk == 0 || isFreezeCrosswalk == 1)) {
+					int shouldCross = randomMoving.nextInt(2);
+					if (shouldCross == 1) {
+						isOnCrosswalk = true;
+						nextPosition = position;
+					} else
+						nextPosition = position - (randomMoving.nextInt(3) - 1);
+				} else
+					nextPosition = position - (randomMoving.nextInt(3) - 1);
 			}
 		}
 		position = nextPosition;

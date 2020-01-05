@@ -294,6 +294,7 @@ public class NeighberhoodSimulator {
 				p.move(isFreezeCrosswalk);
 		}
 		lock.unlock();
+		isFreezeCrosswalk = (isFreezeCrosswalk + 1) % 200;
 	}
 
 	private String getPedestriansData() {
@@ -395,7 +396,7 @@ public class NeighberhoodSimulator {
 		return current_full_state;
 	}
 
-	private void updateEnvVarsFromClient(HashMap<String, Object> dataFromClient) {
+	public void updateEnvVarsFromClient(HashMap<String, Object> dataFromClient) {
 		if (dataFromClient == null)
 			return;
 
@@ -426,7 +427,8 @@ public class NeighberhoodSimulator {
 				break;
 			case "garbageCansSouth":
 				try {
-					garbageCansSouth[(int) dataFromClient.get("garbageCansSouth")] = true;
+					int index = Math.abs(3 - (int) dataFromClient.get("garbageCansSouth"));
+					garbageCansSouth[index] = true;
 				} catch (ClassCastException e) {
 					garbageCansSouth = (boolean[]) dataFromClient.get("garbageCansSouth");
 				}
