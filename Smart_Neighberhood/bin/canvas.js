@@ -236,22 +236,22 @@ function paintStreet(left, top, width, height, isBottom){
 function paintStreetLamps(isBottom) {
   for (i = 1; i < numHouses; i++) {
     if (!isBottom) {
-      paintStreetLamp(i * block, streetH - houseH - sidewalkH / 2, houseW / 3, houseH, false);
+      paintStreetLamp(i * block, streetH - houseH - sidewalkH / 2, houseW / 3, houseH, false, i - 1);
     }
     else {
-      paintStreetLamp(i * block, canvasH - streetH - houseH + sidewalkH / 2, houseW / 3, houseH, true);
+      paintStreetLamp(i * block, canvasH - streetH - houseH + sidewalkH / 2, houseW / 3, houseH, true, i - 1);
     }
   }
 }
 
-function paintStreetLamp(left, top, width, height, isBottom) {
+function paintStreetLamp(left, top, width, height, isBottom, index) {
   const lampW = width / 8;
   ctx.fillStyle = "black";
   ctx.beginPath();
   ctx.arc(left, top + height * 0.1, width / 2, Math.PI, 0);
   ctx.fill();
   ctx.fillRect(left -  lampW / 2, top + 5, lampW , height * 0.9);
-  let isOn = isBottom ? currentState.system.lightSouth : currentState.system.lightNorth;
+  let isOn = isBottom ? currentState.system.lightsSouth[index] : currentState.system.lightsNorth[index];
   if (isOn) {
     ctx.fillStyle = "yellow";
     ctx.globalAlpha = 0.7;

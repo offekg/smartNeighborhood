@@ -2,8 +2,12 @@ package src;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
+
+import com.sun.xml.internal.ws.util.StringUtils;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -70,6 +74,53 @@ public class NeighberhoodSimulator {
 			// TODO: handle it gracefully.
 		}
 
+	}
+	
+	private void printPedestLights() {
+		String spaces;
+		System.out.println();
+		System.out.print("	");
+		for(int i = 0; i < N-1; i++) {
+			if (lightsNorth[i]) 
+				System.out.print(String.format("LN%d+		",i));
+			else
+				System.out.print(String.format("LN%d-		",i));
+		}
+		System.out.println();
+		for(Pedestrian p : pedestrians) {
+			if(p.isInTheNorth && !p.isOnCrosswalk ) {
+				
+				if(p.position == -1)
+					spaces = "";
+				else
+					spaces = String.join("",Collections.nCopies((p.position)*4, "    "));
+				System.out.println(spaces + "P" + p.position);
+			}
+		}
+		System.out.println();
+		for(Pedestrian p3 : pedestrians) {
+			if(p3.isOnCrosswalk)
+				System.out.println("				P in Crosswalk");
+		System.out.println();
+		}
+		System.out.print("	");
+		for(int i = 0; i < N-1; i++) {
+			if (lightsSouth[i]) 
+				System.out.print(String.format("LS%d+		",i));
+			else
+				System.out.print(String.format("LS%d-		",i));
+		}
+		System.out.println();
+		for(Pedestrian p2 : pedestrians) {
+			if(!p2.isInTheNorth && !p2.isOnCrosswalk && p2.position != -1) {
+				if(p2.position == -1)
+					spaces = "";
+				else
+					spaces = String.join("",Collections.nCopies((p2.position)*4, "    "));
+				System.out.println(spaces + "P" + p2.position);
+			}
+		}
+		System.out.println();
 	}
 
 	public HashMap<String, HashMap<String, Object>> getNextState(int scenario_num,
@@ -299,10 +350,11 @@ public class NeighberhoodSimulator {
 			if (dayTime == DayTimeMode.DAY)
 				energyEfficiencyMode = false;
 			else {
-				if (countHours == 24) {
+				/*if (countHours == 24) {
 					energyEfficiencyMode = true;
 					countHours = 0;
-				}
+				}*/
+				energyEfficiencyMode = true;
 			}
 			countHours = 0;
 		}
@@ -336,6 +388,8 @@ public class NeighberhoodSimulator {
 		current_full_state.put("environment", current_environment_state);
 		current_full_state.put("system", current_system_state);
 
+		printPedestLights();
+		
 		return current_full_state;
 	}
 
