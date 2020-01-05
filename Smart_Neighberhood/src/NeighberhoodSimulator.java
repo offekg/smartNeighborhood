@@ -77,6 +77,8 @@ public class NeighberhoodSimulator {
 	}
 	
 	private void printPedestLights() {
+		if(dayTime == DayTimeMode.DAY)
+			return;
 		String spaces;
 		System.out.println();
 		System.out.print("	");
