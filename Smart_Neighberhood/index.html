@@ -49,12 +49,12 @@
     <div class="row">
       <div class="col-12  text-center" >
         <button id="pedestrian" type="button" class="btn btn-amber btn-sm" onclick="sendPedestrian()">Send pedestrian</button>
-        <div class="btn-group" data-toggle="buttons" onclick="setMode('manual')">
-          <label class="btn btn-primary btn-sm">
-            <input type="radio" name="mode" id="manual"> Manual
+        <div class="btn-group" data-toggle="buttons">
+          <label class="btn btn-primary btn-sm active" onclick="setMode('manual')">
+            <input type="radio" name="mode" id="manual" checked> Manual
           </label>
-          <label class="btn btn-primary btn-sm active" onclick="setMode('automatic')">
-            <input type="radio" name="mode" id="automatic" checked> Automatic
+          <label class="btn btn-primary btn-sm" onclick="setMode('automatic')">
+            <input type="radio" name="mode" id="automatic"> Automatic
           </label>
           <label class="btn btn-primary btn-sm" onclick="setMode('semi')">
             <input type="radio" name="mode" id="semi"> Semi
@@ -83,6 +83,7 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
   <!-- MDB core JavaScript -->
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.10.1/js/mdb.min.js"></script>
+  <script type='text/javascript' src="Person.js"></script>
   <script type='text/javascript' src="canvas.js"></script>
   <script type='text/javascript' src="controller.js"></script>
   </body>

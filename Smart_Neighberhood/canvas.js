@@ -45,14 +45,13 @@ const truckImageRatio = 564/516;
 const personH = houseH * 1.5;
 const personImageRatio = 530 / 852;
 const personW = personH * personImageRatio;
-const personImg = new Image();
-personImg.src = "man.png";
 const initTopPersonX = - personW;
 const initTopPersonY = streetH - personH;
 const finalBottomPersonX = canvasW;
 const finalBottomPersonY = streetH + roadH - personH;
 let personX = initTopPersonX;
 let personY = initTopPersonY;
+const personMap = new Map();
 
 const initTopTruckX = - 3 * block / 4;
 const initTopTruckY = streetH - roadH / 10;
@@ -124,6 +123,7 @@ function changeState(isFirst) {
   }
   isNextUpdated = false;
   stateIndex++;
+  console.log(currentState.environment.pedestrians);
 }
 
 function animateTopTruck() {
@@ -169,21 +169,16 @@ function animateBottomTruck(){
 }
 
 function animatePerson(){
-  let animating = false;
-  ctx.drawImage(personImg, personX, personY, personW, personH);
-  if (currentState.environment.sidewalkNorth && personX < (canvasW / 2) - (personW / 2)){
-    personX += Math.round((canvasW / 2 + personW / 2) / animationTime);
-    animating = true;
-  }
-  if (currentState.environment.crossingCrosswalkNS && personY < finalBottomPersonY) {
-    personY += roadH / animationTime;
-    animating = true;
-  }
-  if (currentState.environment.sidewalkSouth && personX < finalBottomPersonX) {
-    personX += (canvasW / 2 + personW / 2) / animationTime;
-    animating = true;
-  }
-  return animating;
+  currentState.environment.pedestrians.forEach(pedestrian => {
+    if (personMap.has(pedestrian.id)) {
+      personMap.get(pedestrian.id).updateAndAnimate(pedestrian, ctx);
+    } else {
+      let person = new Person(pedestrian.id, canvasH, canvasW, animationTime, pedestrian,
+        initTopPersonY, numHouses, personW, personH, personImg);
+      personMap.set(pedestrian.id, person);
+      person.animate(ctx);
+    }
+  })
 }
 
 function paintBackground(){
@@ -241,22 +236,22 @@ function paintStreet(left, top, width, height, isBottom){
 function paintStreetLamps(isBottom) {
   for (i = 1; i < numHouses; i++) {
     if (!isBottom) {
-      paintStreetLamp(i * block, streetH - houseH - sidewalkH / 2, houseW / 3, houseH, false);
+      paintStreetLamp(i * block, streetH - houseH - sidewalkH / 2, houseW / 3, houseH, false, i - 1);
     }
     else {
-      paintStreetLamp(i * block, canvasH - streetH - houseH + sidewalkH / 2, houseW / 3, houseH, true);
+      paintStreetLamp(i * block, canvasH - streetH - houseH + sidewalkH / 2, houseW / 3, houseH, true, i - 1);
     }
   }
 }
 
-function paintStreetLamp(left, top, width, height, isBottom) {
+function paintStreetLamp(left, top, width, height, isBottom, index) {
   const lampW = width / 8;
   ctx.fillStyle = "black";
   ctx.beginPath();
   ctx.arc(left, top + height * 0.1, width / 2, Math.PI, 0);
   ctx.fill();
   ctx.fillRect(left -  lampW / 2, top + 5, lampW , height * 0.9);
-  let isOn = isBottom ? currentState.system.lightSouth : currentState.system.lightNorth;
+  let isOn = isBottom ? currentState.system.lightsSouth[index] : currentState.system.lightsNorth[index];
   if (isOn) {
     ctx.fillStyle = "yellow";
     ctx.globalAlpha = 0.7;

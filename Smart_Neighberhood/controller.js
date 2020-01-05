@@ -7,7 +7,6 @@ function postHttpReqest(url, content) {
   };
   xhttp.open("POST", url, true);
   xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-  let requ
   console.log("sending to url: " + url + " content: " + content);
   xhttp.send(content);
 }
