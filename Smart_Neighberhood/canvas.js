@@ -38,7 +38,7 @@ const lightC = "#fff200";
 const arrowC = "#ffffff";
 const arrowH = Math.round(roadH / 20);
 const arrowW = arrowH * 4;
-const crossingBlockH = 17;
+const crossingBlockH = 15;
 const truckH = (roadH*2)/3;
 const truckImageRatio = 564/516;
 
@@ -48,9 +48,7 @@ const personW = personH * personImageRatio;
 const initTopPersonX = - personW;
 const initTopPersonY = streetH - personH;
 const finalBottomPersonX = canvasW;
-const finalBottomPersonY = streetH + roadH - personH;
-let personX = initTopPersonX;
-let personY = initTopPersonY;
+const initBottomPersonY = streetH + roadH -  3 * personH / 4;
 const personMap = new Map();
 
 const initTopTruckX = - 3 * block / 4;
@@ -112,10 +110,6 @@ function animate() {
 }
 
 function changeState(isFirst) {
-  if (!isFirst && currentState.environment.sidewalkSouth) {
-    personX = initTopPersonX;
-    personY = initTopPersonY;
-  }
   currentState = nextState;
   for (let i = 0; i < numHouses; i++){
     $("#gb" + 0 + i).attr("disabled", currentState.environment.garbageCansNorth[i]);
@@ -174,7 +168,7 @@ function animatePerson(){
       personMap.get(pedestrian.id).updateAndAnimate(pedestrian, ctx);
     } else {
       let person = new Person(pedestrian.id, canvasH, canvasW, animationTime, pedestrian,
-        initTopPersonY, numHouses, personW, personH, personImg);
+        initTopPersonY, initBottomPersonY, numHouses, personW, personH, personImg);
       personMap.set(pedestrian.id, person);
       person.animate(ctx);
     }
