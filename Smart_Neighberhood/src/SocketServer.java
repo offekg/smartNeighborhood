@@ -336,7 +336,9 @@ public class SocketServer {
 			if (data.has(envVar)) {
 				try {
 					Object varValue = data.get(envVar);
-					if (envVar == "garbageCansNorth" || envVar == "garbageCansSouth" || envVar == "scenario") {
+					if ( envVar == "dayTime") {
+						envVarsValues.put(envVar, (String) varValue);
+					} else if (envVar == "garbageCansNorth" || envVar == "garbageCansSouth" || envVar == "scenario") {
 						envVarsValues.put(envVar, (int) varValue);
 					} else if (envVar == "mode") {
 						envVarsValues.put(envVar, (String) varValue);

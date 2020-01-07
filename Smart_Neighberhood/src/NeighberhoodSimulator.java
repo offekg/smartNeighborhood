@@ -255,12 +255,13 @@ public class NeighberhoodSimulator {
 			String s = String.format("pedestrians[%d]", i);
 			System.out.print(s + ": " + executor.getCurValue((String.format("pedestrians[%d]", i))) + "; ");
 		}
-		System.out.println();
+		/*debugs
+		 * System.out.println();
 		Map<String, String> sysValues2 = executor.getCurOutputs();
 		sysValues2.entrySet().forEach(entry->{
 		    System.out.print(entry.getKey() + " " + entry.getValue() + "; ");  
 		 });
-		System.out.println();
+		System.out.println();*/
 	}
 
 	private void updateSystemVarsFromSpectra() throws ControllerExecutorException {
@@ -406,7 +407,7 @@ public class NeighberhoodSimulator {
 		current_full_state.put("environment", current_environment_state);
 		current_full_state.put("system", current_system_state);
 
-		printPedestLights();
+		//printPedestLights();
 		
 		return current_full_state;
 	}
@@ -448,7 +449,7 @@ public class NeighberhoodSimulator {
 				}
 				break;
 			case "dayTime":
-				dayTime = (DayTimeMode) dataFromClient.get("dayTime");
+				dayTime = (DayTimeMode.valueOf((String) dataFromClient.get("dayTime"))) ;
 				break;
 			case "energyEfficiencyMode":
 				energyEfficiencyMode = (boolean) dataFromClient.get("energyEfficiencyMode");
