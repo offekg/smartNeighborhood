@@ -1,4 +1,3 @@
-$(document).ready(function(){
 let stateIndex = 0;
 let currentState;
 let nextState;
@@ -7,6 +6,7 @@ let states;
 let notFoundCount = 0;
 
 const animationTime = 120;
+let currentAnimation = animationTime;
 
 const canvas = document.querySelector('canvas');
 const canvasH = canvas.height;
@@ -39,16 +39,16 @@ const arrowC = "#ffffff";
 const arrowH = Math.round(roadH / 20);
 const arrowW = arrowH * 4;
 const crossingBlockH = 15;
-const truckH = (roadH*2)/3;
+const truckH = Math.round((roadH*2)/3);
 const truckImageRatio = 564/516;
 
-const personH = houseH * 1.5;
+const personH = Math.round(houseH * 1.5);
 const personImageRatio = 530 / 852;
-const personW = personH * personImageRatio;
+const personW = Math.round(personH * personImageRatio);
 const initTopPersonX = - personW;
-const initTopPersonY = streetH - personH;
+const initTopPersonY = Math.round(streetH - 9 * personH / 8);
 const finalBottomPersonX = canvasW;
-const initBottomPersonY = streetH + roadH -  3 * personH / 4;
+const initBottomPersonY = Math.round(streetH + roadH -  3 * personH / 4);
 const personMap = new Map();
 
 const initTopTruckX = - 3 * block / 4;
@@ -59,12 +59,20 @@ let topTruckX = Number.MAX_SAFE_INTEGER;
 let topTruckY = initTopTruckY;
 let bottomTruckX = Number.MIN_SAFE_INTEGER;
 let bottomTruckY = initBottomTruckY;
-var truckImg = new Image();
+let truckImg = new Image();
 truckImg.src = "truck.png";
-var truckRevImg = new Image();
+let truckRevImg = new Image();
 truckRevImg.src = "truckRev.png";
 
-getNextState();
+function resetAnimation() {
+  let topTruckX = Number.MAX_SAFE_INTEGER;
+  let topTruckY = initTopTruckY;
+  let bottomTruckX = Number.MIN_SAFE_INTEGER;
+  let bottomTruckY = initBottomTruckY;
+  personMap.clear();
+  stateIndex = 0;
+  getNextState();
+}
 
 function getNextState() {
   waitingResponse = true;
@@ -73,8 +81,6 @@ function getNextState() {
     if (this.readyState == 4 && this.status == 200) {
      nextState = JSON.parse(this.responseText);
      nextState.system.garbageTruckSouth_location = 3 - nextState.system.garbageTruckSouth_location;
-     // TODO: remove once API is complete.
-     // nextState.environment.isNight = false;
      nextState.environment.garbageCansSouth.reverse();
      isNextUpdated = true;
      waitingResponse = false;
@@ -82,24 +88,28 @@ function getNextState() {
        changeState(true);
        animate();
      }
-    }
+   }
   };
   xhttp.open("GET", "/api", true);
   xhttp.send();
 }
 
 function animate() {
+  currentAnimation -= 3;
   paintBackground();
   paintStreetLamps(false);
   let animatingTop = animateTopTruck();
   let animatingBottom = animateBottomTruck();
   let animatingPerson = animatePerson();
-  if (!animatingPerson && !animatingTop && !animatingBottom) {
+  if (!animatingPerson && !animatingTop && !animatingBottom && currentAnimation <= 0) {
     if (isNextUpdated) {
       changeState();
     } else {
       notFoundCount++;
-      if (notFoundCount > 10) return;
+      if (notFoundCount > 1000) {
+        console.log("!!!Too many not found!!! Exiting...");
+        return;
+      };
     }
   }
   if (!isNextUpdated && !waitingResponse) {
@@ -117,6 +127,7 @@ function changeState(isFirst) {
   }
   isNextUpdated = false;
   stateIndex++;
+  currentAnimation = animationTime;
   console.log(currentState.environment.pedestrians);
 }
 
@@ -163,16 +174,22 @@ function animateBottomTruck(){
 }
 
 function animatePerson(){
+  let animating = false;
   currentState.environment.pedestrians.forEach(pedestrian => {
+    let person = null;
     if (personMap.has(pedestrian.id)) {
-      personMap.get(pedestrian.id).updateAndAnimate(pedestrian, ctx);
+      person = personMap.get(pedestrian.id);
+      person.update(pedestrian);
     } else {
-      let person = new Person(pedestrian.id, canvasH, canvasW, animationTime, pedestrian,
+      person = new Person(pedestrian.id, canvasH, canvasW, animationTime, pedestrian,
         initTopPersonY, initBottomPersonY, numHouses, personW, personH, personImg);
       personMap.set(pedestrian.id, person);
-      person.animate(ctx);
     }
-  })
+    if (person != null) {
+      animating = person.animate(ctx) || animating;
+    }
+  });
+  return animating;
 }
 
 function paintBackground(){
@@ -336,4 +353,7 @@ function paintArrow(left, top, width, height, isLeft) {
     ctx.fill();
   }
 }
+
+$(document).ready(function(){
+getNextState();
 });

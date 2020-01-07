@@ -119,39 +119,62 @@ gar G (crossing & (garbageTruckSouth_location = crosswalkLoc)) ->
    (next(garbageTruckSouth_location) = crosswalkLoc); 
 
 //If truck at full can, stays there to clean next turn
-predicate truckAtFullCanWillCleanNorth(Int(0..(3)) i):
+/*predicate truckAtFullCanWillCleanNorth(Int(0..(3)) i):
 	(garbageCansNorth[i] & (garbageTruckNorth_location = i) & !isCleaningN) -> (next(isCleaningN) & (next(garbageTruckNorth_location) = i));
 
 gar G truckAtFullCanWillCleanNorth(0);
 gar G truckAtFullCanWillCleanNorth(1);
 gar G truckAtFullCanWillCleanNorth(2);
-gar G truckAtFullCanWillCleanNorth(3);
+gar G truckAtFullCanWillCleanNorth(3);*/
 
-predicate truckAtFullCanWillCleanSouth(Int(0..(3)) i):
+//If truck at full can, stays there to clean next turn
+gar G (garbageCansNorth[0] & (garbageTruckNorth_location = 0) & !isCleaningN) -> (next(isCleaningN) & (next(garbageTruckNorth_location) = 0));
+gar G (garbageCansNorth[1] & (garbageTruckNorth_location = 1) & !isCleaningN) -> (next(isCleaningN) & (next(garbageTruckNorth_location) = 1));
+gar G (garbageCansNorth[2] & (garbageTruckNorth_location = 2) & !isCleaningN) -> (next(isCleaningN) & (next(garbageTruckNorth_location) = 2));
+gar G (garbageCansNorth[3] & (garbageTruckNorth_location = 3) & !isCleaningN) -> (next(isCleaningN) & (next(garbageTruckNorth_location) = 3));
+
+/*predicate truckAtFullCanWillCleanSouth(Int(0..(3)) i):
 	(garbageCansSouth[i] & (garbageTruckSouth_location = i) & !isCleaningS) -> (next(isCleaningS) & (next(garbageTruckSouth_location) = i));
 
 gar G truckAtFullCanWillCleanSouth(0);
 gar G truckAtFullCanWillCleanSouth(1);
 gar G truckAtFullCanWillCleanSouth(2);
-gar G truckAtFullCanWillCleanSouth(3);
+gar G truckAtFullCanWillCleanSouth(3);*/
+
+gar G (garbageCansSouth[0] & (garbageTruckSouth_location = 0) & !isCleaningS) -> (next(isCleaningS) & (next(garbageTruckSouth_location) = 0));
+gar G (garbageCansSouth[1] & (garbageTruckSouth_location = 1) & !isCleaningS) -> (next(isCleaningS) & (next(garbageTruckSouth_location) = 1));
+gar G (garbageCansSouth[2] & (garbageTruckSouth_location = 2) & !isCleaningS) -> (next(isCleaningS) & (next(garbageTruckSouth_location) = 2));
+gar G (garbageCansSouth[3] & (garbageTruckSouth_location = 3) & !isCleaningS) -> (next(isCleaningS) & (next(garbageTruckSouth_location) = 3));
 
 	
 //If truck is currently cleaning a full can, next state it won't be cleaning and can will be empty.
-predicate truckCleaningWillStopNorth(Int(0..(3)) i):
+/*predicate truckCleaningWillStopNorth(Int(0..(3)) i):
 	((garbageCansNorth[i] & (garbageTruckNorth_location = i) & isCleaningN)) -> 
 										(next(!isCleaningN) & next(!garbageCansNorth[i]));
 gar G truckCleaningWillStopNorth(0);
 gar G truckCleaningWillStopNorth(1);
 gar G truckCleaningWillStopNorth(2);
-gar G truckCleaningWillStopNorth(3);
+gar G truckCleaningWillStopNorth(3);*/
 
-predicate truckCleaningWillStopSouth(Int(0..(3)) i):
+//If truck is currently cleaning a full can, next state it won't be cleaning and can will be empty.
+gar G ((garbageCansNorth[0] & (garbageTruckNorth_location = 0) & isCleaningN)) -> (next(!isCleaningN) & next(!garbageCansNorth[0]));
+gar G ((garbageCansNorth[1] & (garbageTruckNorth_location = 1) & isCleaningN)) -> (next(!isCleaningN) & next(!garbageCansNorth[1]));
+gar G ((garbageCansNorth[2] & (garbageTruckNorth_location = 2) & isCleaningN)) -> (next(!isCleaningN) & next(!garbageCansNorth[2]));
+gar G ((garbageCansNorth[3] & (garbageTruckNorth_location = 3) & isCleaningN)) -> (next(!isCleaningN) & next(!garbageCansNorth[3]));
+
+
+/*predicate truckCleaningWillStopSouth(Int(0..(3)) i):
 	((garbageCansSouth[i] & (garbageTruckSouth_location = i) & isCleaningS)) -> 
 										(next(!isCleaningS) & next(!garbageCansSouth[i]));
 gar G truckCleaningWillStopSouth(0);
 gar G truckCleaningWillStopSouth(1);
 gar G truckCleaningWillStopSouth(2);
-gar G truckCleaningWillStopSouth(3);
+gar G truckCleaningWillStopSouth(3);*/
+
+gar G ((garbageCansSouth[0] & (garbageTruckSouth_location = 0) & isCleaningS)) -> (next(!isCleaningS) & next(!garbageCansSouth[0]));
+gar G ((garbageCansSouth[1] & (garbageTruckSouth_location = 1) & isCleaningS)) -> (next(!isCleaningS) & next(!garbageCansSouth[1]));
+gar G ((garbageCansSouth[2] & (garbageTruckSouth_location = 2) & isCleaningS)) -> (next(!isCleaningS) & next(!garbageCansSouth[2]));
+gar G ((garbageCansSouth[3] & (garbageTruckSouth_location = 3) & isCleaningS)) -> (next(!isCleaningS) & next(!garbageCansSouth[3]));
 
 
 //If truck is cleaning, next turn it doesn't move and isn't cleaning 
@@ -165,19 +188,30 @@ gar alw (isCleaningS -> (exists i in Int(0..(N-1)). (garbageCansSouth[i] = true 
 
 
 //Eventually always, the truck will come to clean all full cans.
-predicate isCleaningGarbageNorth(Int(0..(3)) i):
+/*predicate isCleaningGarbageNorth(Int(0..(3)) i):
 	(garbageCansNorth[i] & (garbageTruckNorth_location = i) & isCleaningN);
 gar GF isCleaningGarbageNorth(0);
 gar GF isCleaningGarbageNorth(1);
 gar GF isCleaningGarbageNorth(2);
-gar GF isCleaningGarbageNorth(3);
+gar GF isCleaningGarbageNorth(3);*/
 
-predicate isCleaningGarbageSouth(Int(0..(3)) i):
+//Eventually always, the truck will come to clean all full cans.
+gar GF (garbageCansNorth[0] & (garbageTruckNorth_location = 0) & isCleaningN);
+gar GF (garbageCansNorth[1] & (garbageTruckNorth_location = 1) & isCleaningN);
+gar GF (garbageCansNorth[2] & (garbageTruckNorth_location = 2) & isCleaningN);
+gar GF (garbageCansNorth[3] & (garbageTruckNorth_location = 3) & isCleaningN);
+
+/*predicate isCleaningGarbageSouth(Int(0..(3)) i):
 	(garbageCansSouth[i] & (garbageTruckSouth_location = i) & isCleaningS);
 gar GF isCleaningGarbageSouth(0);
 gar GF isCleaningGarbageSouth(1);
 gar GF isCleaningGarbageSouth(2);
-gar GF isCleaningGarbageSouth(3);
+gar GF isCleaningGarbageSouth(3);*/
+
+gar GF (garbageCansSouth[0] & (garbageTruckSouth_location = 0) & isCleaningS);
+gar GF (garbageCansSouth[1] & (garbageTruckSouth_location = 1) & isCleaningS);
+gar GF (garbageCansSouth[2] & (garbageTruckSouth_location = 2) & isCleaningS);
+gar GF (garbageCansSouth[3] & (garbageTruckSouth_location = 3) & isCleaningS);
 
 
 //Garbage trucks can only move one can forward, or stay in place.

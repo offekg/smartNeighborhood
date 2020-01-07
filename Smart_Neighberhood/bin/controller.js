@@ -1,18 +1,14 @@
-function postHttpReqest(url, content) {
+function postHttpReqest(url, content, callback = function(){}) {
   let xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      console.log("SUCCESS" + this.responseText);
-    }
-  };
+  xhttp.onreadystatechange = callback;
   xhttp.open("POST", url, true);
   xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   console.log("sending to url: " + url + " content: " + content);
   xhttp.send(content);
 }
 
-function postToApi(content) {
-  postHttpReqest("/api", "data: " + content);
+function postToApi(content, callback = function(){}) {
+  postHttpReqest("/api", "data: " + content, callback);
 }
 
 function setGarbage(index, isBottom) {
@@ -25,9 +21,12 @@ function startScenario(number) {
 }
 
 function setMode(mode) {
-  postToApi("{mode:" + mode + "}");
+  callback = function() {
+    location.reload();
+  };
+  postToApi("{mode:" + mode + "}",callback);
 }
 
 function sendPedestrian(){
-  //TODO: implement
+  postToApi("{pedestrian=true}");
 }
