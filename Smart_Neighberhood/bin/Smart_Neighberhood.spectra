@@ -1,5 +1,5 @@
 
-spec SmartNeighborhood_sprint03_ver3
+spec SmartNeighborhood
 
 // *** define type of day and night ***
 type DayTime = {DAY, NIGHT};
@@ -37,7 +37,7 @@ sys boolean[NUM_LIGHTS] lights;
 //***Assumptions on day and night***
 asm GF dayTime=DAY;
 asm GF dayTime=NIGHT;// & energyEfficiencyMode;
-asm GF energyEfficiencyMode;
+//asm GF energyEfficiencyMode;
 //asm GF !energyEfficiencyMode;
 
 
@@ -231,7 +231,7 @@ gar G (!sidewalkSouth & energyEfficiencyMode)-> !lightSouth;
 gar G ((dayTime= NIGHT) & sidewalkNorth & energyEfficiencyMode) -> lightNorth; 
 gar G ((dayTime= NIGHT) & sidewalkSouth & energyEfficiencyMode) -> lightSouth;*/
 
-
+/* 
 predicate energyEfficientNorthLightOFF(Int(0..(2)) i):
 	(((dayTime = NIGHT) & energyEfficiencyMode & !pedestrians[i] & !pedestrians[i+1]) -> !lights[i]);
 gar alw energyEfficientNorthLightOFF(0);
@@ -241,8 +241,15 @@ predicate energyEfficientSouthLightOFF(Int(3..(5)) i):
 	(((dayTime = NIGHT) & energyEfficiencyMode & !pedestrians[i+1] & !pedestrians[i+2]) -> !lights[i]);
 gar alw energyEfficientSouthLightOFF(3);
 gar alw energyEfficientSouthLightOFF(4);
-gar alw energyEfficientSouthLightOFF(5);
+gar alw energyEfficientSouthLightOFF(5); */
 
+gar alw (((dayTime = NIGHT) & energyEfficiencyMode & !pedestrians[0] & !pedestrians[1]) -> !lights[0]);
+gar alw (((dayTime = NIGHT) & energyEfficiencyMode & !pedestrians[1] & !pedestrians[2]) -> !lights[1]);
+gar alw (((dayTime = NIGHT) & energyEfficiencyMode & !pedestrians[2] & !pedestrians[3]) -> !lights[2]);
+gar alw (((dayTime = NIGHT) & energyEfficiencyMode & !pedestrians[4] & !pedestrians[5]) -> !lights[3]);
+gar alw (((dayTime = NIGHT) & energyEfficiencyMode & !pedestrians[5] & !pedestrians[6]) -> !lights[4]);
+gar alw (((dayTime = NIGHT) & energyEfficiencyMode & !pedestrians[6] & !pedestrians[7]) -> !lights[5]);
+/*
 predicate energyEfficientNorthLightON(Int(0..(2)) i):
 	(((dayTime = NIGHT) & (pedestrians[i] | pedestrians[i+1]) & energyEfficiencyMode) -> lights[i]);
 gar alw energyEfficientNorthLightON(0);
@@ -252,7 +259,14 @@ predicate energyEfficientSouthLightON(Int(3..(5)) i):
 	(((dayTime = NIGHT) & (pedestrians[i+1] | pedestrians[i+2]) & energyEfficiencyMode) -> lights[i]);
 gar alw energyEfficientSouthLightON(3);
 gar alw energyEfficientSouthLightON(4);
-gar alw energyEfficientSouthLightON(5);
+gar alw energyEfficientSouthLightON(5);*/
+
+gar alw (((dayTime = NIGHT) & (pedestrians[0] | pedestrians[1]) & energyEfficiencyMode) -> lights[0]);
+gar alw (((dayTime = NIGHT) & (pedestrians[1] | pedestrians[2]) & energyEfficiencyMode) -> lights[1]);
+gar alw (((dayTime = NIGHT) & (pedestrians[2] | pedestrians[3]) & energyEfficiencyMode) -> lights[2]);
+gar alw (((dayTime = NIGHT) & (pedestrians[4] | pedestrians[5]) & energyEfficiencyMode) -> lights[3]);
+gar alw (((dayTime = NIGHT) & (pedestrians[5] | pedestrians[6]) & energyEfficiencyMode) -> lights[4]);
+gar alw (((dayTime = NIGHT) & (pedestrians[6] | pedestrians[7]) & energyEfficiencyMode) -> lights[5]);
 
 //old light logic with weights
 /* 
@@ -272,4 +286,3 @@ weight 1
 	lightNorth & sidewalkNorth;
 weight 1
 	lightSouth & sidewalkSouth;*/
-

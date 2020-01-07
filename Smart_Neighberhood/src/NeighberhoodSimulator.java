@@ -11,6 +11,7 @@ import com.sun.xml.internal.ws.util.StringUtils;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import src.ScenarioManager;
 
@@ -250,6 +251,16 @@ public class NeighberhoodSimulator {
 		
 		System.out.println("updating to spectra");
 		executor.updateState(true, true);
+		for (int i = 0; i < N*2 + 1; i++) {
+			String s = String.format("pedestrians[%d]", i);
+			System.out.print(s + ": " + executor.getCurValue((String.format("pedestrians[%d]", i))) + "; ");
+		}
+		System.out.println();
+		Map<String, String> sysValues2 = executor.getCurOutputs();
+		sysValues2.entrySet().forEach(entry->{
+		    System.out.print(entry.getKey() + " " + entry.getValue() + "; ");  
+		 });
+		System.out.println();
 	}
 
 	private void updateSystemVarsFromSpectra() throws ControllerExecutorException {
