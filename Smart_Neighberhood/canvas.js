@@ -5,6 +5,8 @@ let isNextUpdated;
 let states;
 let notFoundCount = 0;
 
+let mode;
+
 const animationTime = 120;
 let currentAnimation = animationTime;
 
@@ -74,6 +76,21 @@ function resetAnimation() {
   getNextState();
 }
 
+function updateMode() {
+  let xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      mode = this.responseText;
+    }
+  };
+  xhttp.open("GET", "/api/current_mode", true);
+  xhttp.send();
+}
+
+function resetSpectra() {
+  $.post("api/reset");
+}
+
 function getNextState() {
   waitingResponse = true;
   let xhttp = new XMLHttpRequest();
@@ -121,9 +138,10 @@ function animate() {
 
 function changeState(isFirst) {
   currentState = nextState;
+  const isAutomatic = mode === "AUTOMATIC";
   for (let i = 0; i < numHouses; i++){
-    $("#gb" + 0 + i).attr("disabled", currentState.environment.garbageCansNorth[i]);
-    $("#gb" + 1 + i).attr("disabled", currentState.environment.garbageCansSouth[i]);
+    $("#gb" + 0 + i).attr("disabled", currentState.environment.garbageCansNorth[i] || isAutomatic);
+    $("#gb" + 1 + i).attr("disabled", currentState.environment.garbageCansSouth[i] || isAutomatic);
   }
   isNextUpdated = false;
   stateIndex++;
@@ -355,5 +373,7 @@ function paintArrow(left, top, width, height, isLeft) {
 }
 
 $(document).ready(function(){
-getNextState();
+  resetSpectra();
+  updateMode();
+  getNextState();
 });

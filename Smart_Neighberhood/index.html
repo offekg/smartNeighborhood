@@ -48,15 +48,17 @@
     </div>
     <div class="row">
       <div class="col-12  text-center" >
-        <button id="pedestrian" type="button" class="btn btn-amber btn-sm" onclick="sendPedestrian()">Send pedestrian</button>
+        <button type="button" class="btn btn-unique btn-sm" onclick="setNightDay(!currentState.environment.isNight)">Night / Day</button>
+        <button type="button" class="btn btn-dark-green btn-sm" onclick="setEnergySavingMode(!currentState.environment.energyEfficiencyMode)">Energy Saving Mode</button>
+        <button id="pedestrian" type="button" class="btn btn-amber btn-sm" onclick="sendPedestrian()">Send Pedestrian</button>
         <div class="btn-group" data-toggle="buttons">
-          <label class="btn btn-primary btn-sm active" onclick="setMode('manual')">
-            <input type="radio" name="mode" id="manual" checked> Manual
+          <label id="MANUAL" class="btn btn-primary btn-sm" onclick="setMode('manual')">
+            <input type="radio" name="mode" id="manual"> Manual
           </label>
-          <label class="btn btn-primary btn-sm" onclick="setMode('automatic')">
+          <label id="AUTOMATIC" class="btn btn-primary btn-sm" onclick="setMode('automatic')">
             <input type="radio" name="mode" id="automatic"> Automatic
           </label>
-          <label class="btn btn-primary btn-sm" onclick="setMode('semi')">
+          <label id="SEMI" class="btn btn-primary btn-sm" onclick="setMode('semi')">
             <input type="radio" name="mode" id="semi"> Semi
           </label>
         </div>

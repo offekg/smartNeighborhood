@@ -51,8 +51,6 @@ class Person {
           this.y -= Math.round(2 * this.crosswalkLength / this.animationTime);
           animating = true;
         }
-        if(!animating)
-          console.log("WHY");
       }
     } else if (this.x < this.position * this.block + this.block / 2 - (this.width / 2) - 2){
       this.currentImg = personImg;
@@ -64,7 +62,6 @@ class Person {
       animating = true;
     }
     ctx.drawImage(this.currentImg, this.x, this.y, this.width, this.height);
-    if (!animating && this.isOnCrosswalk) console.log("this.y " + this.y + "init top " + this.initTopPersonY + "initBottomPersonY " + this.initBottomPersonY);
     return animating;
   }
 }
