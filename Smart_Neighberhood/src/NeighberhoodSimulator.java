@@ -165,15 +165,18 @@ public class NeighberhoodSimulator {
 			scenario = new ScenarioManager(8);
 			break;
 		case 9: // random mode.
+			setEnvVarsToDefault();
 			moveAllPedestrians();
 			randomNextState();
 			break;
 		case 10: // semi-automatic mode.
+			setEnvVarsToDefault();
 			moveAllPedestrians();
 			randomNextState();
 			updateEnvVarsFromClient(dataFromClient);
 			break;
 		case 11: // manual mode.
+			setEnvVarsToDefault();
 			moveAllPedestrians();
 			updateEnvVarsFromClient(dataFromClient);
 			break;
@@ -279,6 +282,14 @@ public class NeighberhoodSimulator {
 		garbageTruckNorth_location = Integer.parseInt(executor.getCurValue("garbageTruckNorth_location"));
 		garbageTruckSouth_location = Integer.parseInt(executor.getCurValue("garbageTruckSouth_location"));
 	}
+	
+	private void addRandomPedestrian() {
+		int startPosition = random.nextInt(2);
+		if (startPosition == 0)
+			addNewPedestrian(-1, random.nextBoolean());
+		else
+			addNewPedestrian(4, random.nextBoolean());
+	}
 
 	private void addNewPedestrian(int position, boolean isInNorth) {
 		Pedestrian p = new Pedestrian(++lastPedestrianId, position, isInNorth);
@@ -352,11 +363,7 @@ public class NeighberhoodSimulator {
 //		else
 //			sidewalkNorth = false;
 		if (random.nextInt(5) == 0) {
-			int startPosition = random.nextInt(2);
-			if (startPosition == 0)
-				addNewPedestrian(-1, random.nextBoolean());
-			else
-				addNewPedestrian(4, random.nextBoolean());
+			addRandomPedestrian();
 		}
 
 		if (countHours != 0 && countHours % 12 == 0) {
@@ -426,8 +433,7 @@ public class NeighberhoodSimulator {
 //				crossingCrosswalkSN = (boolean) dataFromClient.get("crossingCrosswalkSN");
 //				break;
 			case "pedestrian":
-				Object[] pedestrian = (Object[]) dataFromClient.get("pedestrian");
-				addNewPedestrian((int) pedestrian[0], (boolean) pedestrian[1]);
+				addRandomPedestrian();
 				break;
 			case "garbageCansNorth":
 				try {
