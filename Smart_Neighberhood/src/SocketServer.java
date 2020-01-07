@@ -91,6 +91,7 @@ public class SocketServer {
 			if (method.equals("GET")) {
 				if (path.contains("api/current_mode"))
 					createAndSendResponseToClient(socket, String.valueOf(mode), (Boolean) dataDict.get("isClientChrome"));
+				
 				else if (path.contains("api")) {
 					if ((Boolean) dataDict.get("data_exists") == true) {
 						createAndSendResponseToClient(socket,
@@ -100,11 +101,13 @@ public class SocketServer {
 						createAndSendResponseToClient(socket,
 								spectraVarsToJson(mode.getModeScenarioNum(), null).toString(),
 								(Boolean) dataDict.get("isClientChrome"));
-				} else
+				} 
+				
+				else
 					newConnectionFound(socket, parse, path);
 			} else {
 				if (path.contains("api/reset")) {
-					setNewUserModeAccordingToUserRequest("manual");
+					spectraVarsToJson(0, null);
 					createAndSendResponseToClient(socket, "", (Boolean) dataDict.get("isClientChrome"));
 				}
 

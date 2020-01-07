@@ -165,18 +165,15 @@ public class NeighberhoodSimulator {
 			scenario = new ScenarioManager(8);
 			break;
 		case 9: // random mode.
-			setEnvVarsToDefault();
 			moveAllPedestrians();
 			randomNextState();
 			break;
 		case 10: // semi-automatic mode.
-			setEnvVarsToDefault();
 			moveAllPedestrians();
 			randomNextState();
 			updateEnvVarsFromClient(dataFromClient);
 			break;
 		case 11: // manual mode.
-			setEnvVarsToDefault();
 			moveAllPedestrians();
 			updateEnvVarsFromClient(dataFromClient);
 			break;
