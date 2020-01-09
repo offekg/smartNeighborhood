@@ -251,12 +251,13 @@ public class NeighberhoodSimulator {
 		
 		System.out.println("updating to spectra");
 		executor.updateState(true, true);
-		for (int i = 0; i < N*2 + 1; i++) {
+		/*debugs
+		 for (int i = 0; i < N*2 + 1; i++) {
 			String s = String.format("pedestrians[%d]", i);
 			System.out.print(s + ": " + executor.getCurValue((String.format("pedestrians[%d]", i))) + "; ");
 		}
-		/*debugs
-		 * System.out.println();
+		
+		System.out.println();
 		Map<String, String> sysValues2 = executor.getCurOutputs();
 		sysValues2.entrySet().forEach(entry->{
 		    System.out.print(entry.getKey() + " " + entry.getValue() + "; ");  
