@@ -25,8 +25,10 @@ public class Pedestrian {
 	public void move(int isFreezeCrosswalk) {
 		int nextPosition;
 		if (isOnCrosswalk) {
-			cross();
-			nextPosition = randomMoving.nextInt(2) + 1;
+			if (allowedToCross) // means that pedestrian did not crossed yet.
+				nextPosition = startCross();
+			else 
+				nextPosition = finishCross();
 		} else {
 			if (!isAppeared) {
 				if (position == -1)
@@ -47,13 +49,21 @@ public class Pedestrian {
 					nextPosition = position - (randomMoving.nextInt(3) - 1);
 			}
 		}
+		
 		position = nextPosition;
 	}
 
-	public void cross() {
+	public int startCross() {
 		isInTheNorth = !isInTheNorth;
-		isOnCrosswalk = false;
 		allowedToCross = false;
+		
+		return position;
+	}
+	
+	public int finishCross() {
+		isOnCrosswalk = false;
+		
+		return randomMoving.nextInt(2) + 1;
 	}
 
 	public boolean isPedestrianExists() {
@@ -68,6 +78,7 @@ public class Pedestrian {
 		pedestrianData.put("position", this.position);
 		pedestrianData.put("isInNorth", this.isInTheNorth);
 		pedestrianData.put("isOnCrosswalk", this.isOnCrosswalk);
+		
 		return pedestrianData;
 	}
 }

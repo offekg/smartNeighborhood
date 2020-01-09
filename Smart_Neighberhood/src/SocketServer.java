@@ -63,8 +63,6 @@ public class SocketServer {
 	private static int houseCount = 4;
 	private static String[] envVars = new String[] { "pedestrian", "garbageCansNorth", "garbageCansSouth", "dayTime",
 			"energyEfficiencyMode", "mode", "scenario" };
-	private static String[] sysVars = new String[] { "isCleaningN", "isCleaningS", "lights",
-			"garbageTruckNorth_location", "garbageTruckSouth_location" };
 
 	private static String input = "";
 	private static userMode mode = userMode.MANUAL;
@@ -89,45 +87,9 @@ public class SocketServer {
 			String path = parse.nextToken().toLowerCase(); // we get file requested
 			
 			if (method.equals("GET")) {
-				if (path.contains("api/current_mode"))
-					createAndSendResponseToClient(socket, String.valueOf(mode), (Boolean) dataDict.get("isClientChrome"));
-				
-				else if (path.contains("api")) {
-					if ((Boolean) dataDict.get("data_exists") == true) {
-						createAndSendResponseToClient(socket,
-								spectraVarsToJson(mode.getModeScenarioNum(), dataDict).toString(),
-								(Boolean) dataDict.get("isClientChrome"));
-					} else
-						createAndSendResponseToClient(socket,
-								spectraVarsToJson(mode.getModeScenarioNum(), null).toString(),
-								(Boolean) dataDict.get("isClientChrome"));
-				} 
-				
-				else
-					newConnectionFound(socket, parse, path);
+				handleGetRequest(path, socket, parse, dataDict);
 			} else {
-				if (path.contains("api/reset")) {
-					spectraVarsToJson(0, null);
-					createAndSendResponseToClient(socket, "", (Boolean) dataDict.get("isClientChrome"));
-				}
-
-				else if (path.contains("api/scenario")) {
-					int scenarioiNum = (int) dataDict.get("scenario");
-					spectraVarsToJson(scenarioiNum, null);
-					createAndSendResponseToClient(socket, "", (Boolean) dataDict.get("isClientChrome"));
-					mode = userMode.SCENARIO;
-					colorMe(messageTypes.INFO, "Switching to scenario: " + scenarioiNum, false);
-				}
-
-				else if (path.contains("api")) {
-					if ((Boolean) dataDict.get("data_exists") == true) {
-						if (dataDict.containsKey("mode"))
-							setNewUserModeAccordingToUserRequest((String) dataDict.get("mode"));
-						else
-							sim.updateEnvVarsFromClient(dataDict);
-						createAndSendResponseToClient(socket, "", (Boolean) dataDict.get("isClientChrome"));
-					}
-				}
+				handlePostRequest(path, socket, dataDict);
 			}
 
 			ois.close();
@@ -276,6 +238,50 @@ public class SocketServer {
 			return "text/javascript";
 		else
 			return "text/plain";
+	}
+	
+	private static void handleGetRequest(String path, Socket socket, StringTokenizer parse, HashMap<String, Object> dataDict) throws IOException {
+		if (path.contains("api/current_mode"))
+			createAndSendResponseToClient(socket, String.valueOf(mode), (Boolean) dataDict.get("isClientChrome"));
+		
+		else if (path.contains("api")) {
+			if ((Boolean) dataDict.get("data_exists") == true) {
+				createAndSendResponseToClient(socket,
+						spectraVarsToJson(mode.getModeScenarioNum(), dataDict).toString(),
+						(Boolean) dataDict.get("isClientChrome"));
+			} else
+				createAndSendResponseToClient(socket,
+						spectraVarsToJson(mode.getModeScenarioNum(), null).toString(),
+						(Boolean) dataDict.get("isClientChrome"));
+		} 
+		
+		else
+			newConnectionFound(socket, parse, path);
+	}
+	
+	private static void handlePostRequest(String path, Socket socket, HashMap<String, Object> dataDict) {
+		if (path.contains("api/reset")) {
+			spectraVarsToJson(0, null);
+			createAndSendResponseToClient(socket, "", (Boolean) dataDict.get("isClientChrome"));
+		}
+
+		else if (path.contains("api/scenario")) {
+			int scenarioiNum = (int) dataDict.get("scenario");
+			spectraVarsToJson(scenarioiNum, null);
+			createAndSendResponseToClient(socket, "", (Boolean) dataDict.get("isClientChrome"));
+			mode = userMode.SCENARIO;
+			colorMe(messageTypes.INFO, "Switching to scenario: " + scenarioiNum, false);
+		}
+
+		else if (path.contains("api")) {
+			if ((Boolean) dataDict.get("data_exists") == true) {
+				if (dataDict.containsKey("mode"))
+					setNewUserModeAccordingToUserRequest((String) dataDict.get("mode"));
+				else
+					sim.updateEnvVarsFromClient(dataDict);
+				createAndSendResponseToClient(socket, "", (Boolean) dataDict.get("isClientChrome"));
+			}
+		}
 	}
 
 	/*********************************************************************************/
