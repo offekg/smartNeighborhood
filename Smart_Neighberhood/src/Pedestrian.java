@@ -31,11 +31,13 @@ public class Pedestrian {
 				nextPosition = finishCross();
 		} else {
 			if (!isAppeared) {
-				if (position == -1)
-					nextPosition = 0;
+				if (position < 1)
+					nextPosition = position + 1;
 				else
-					nextPosition = 3;
-				isAppeared = true;
+					nextPosition = position + 1;
+				
+				if (nextPosition >= 1 && nextPosition <= 2)
+					isAppeared = true;
 			} else {
 				if (allowedToCross && (position == 1 || position == 2)
 						&& !(isFreezeCrosswalk == 0 || isFreezeCrosswalk == 1)) {

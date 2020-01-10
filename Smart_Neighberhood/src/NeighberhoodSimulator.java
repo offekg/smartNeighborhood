@@ -289,6 +289,14 @@ public class NeighberhoodSimulator {
 		else
 			addNewPedestrian(4, random.nextBoolean());
 	}
+	
+	private void addRandomPedestrianFromClient() {
+		int startPosition = random.nextInt(2);
+		if (startPosition == 0)
+			addNewPedestrian(-2, random.nextBoolean());
+		else
+			addNewPedestrian(5, random.nextBoolean());
+	}
 
 	private void addNewPedestrian(int position, boolean isInNorth) {
 		Pedestrian p = new Pedestrian(++lastPedestrianId, position, isInNorth);
@@ -432,7 +440,7 @@ public class NeighberhoodSimulator {
 //				crossingCrosswalkSN = (boolean) dataFromClient.get("crossingCrosswalkSN");
 //				break;
 			case "pedestrian":
-				addRandomPedestrian();
+				addRandomPedestrianFromClient();
 				break;
 			case "garbageCansNorth":
 				try {
