@@ -66,6 +66,9 @@ truckImg.src = "truck.png";
 let truckRevImg = new Image();
 truckRevImg.src = "truckRev.png";
 
+let savingImg = new Image();
+savingImg.src = "EEF-blue.png";
+
 function resetAnimation() {
   let topTruckX = Number.MAX_SAFE_INTEGER;
   let topTruckY = initTopTruckY;
@@ -133,6 +136,7 @@ function animate() {
     getNextState(false);
   }
   paintStreetLamps(true);
+  paintSavingMode()
   requestAnimationFrame(animate);
 }
 
@@ -214,6 +218,11 @@ function animatePerson(){
     }
   });
   return animating;
+}
+
+function paintSavingMode() {
+  if (currentState.environment.energyEfficiencyMode)
+    ctx.drawImage(savingImg, canvasW - houseW - 5, 5, houseW, houseW);
 }
 
 function paintBackground(){

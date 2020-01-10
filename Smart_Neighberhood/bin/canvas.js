@@ -143,6 +143,12 @@ function changeState(isFirst) {
     $("#gb" + 0 + i).attr("disabled", currentState.environment.garbageCansNorth[i] || isAutomatic);
     $("#gb" + 1 + i).attr("disabled", currentState.environment.garbageCansSouth[i] || isAutomatic);
   }
+  if (currentState.environment.energyEfficiencyMode && !$('#energy').hasClass('active')){
+    $('#energy').addClass('active')
+  }
+  if (!currentState.environment.energyEfficiencyMode && $('#energy').hasClass('active')){
+    $('#energy').removeClass('active')
+  }
   isNextUpdated = false;
   stateIndex++;
   currentAnimation = animationTime;
