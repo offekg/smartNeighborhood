@@ -241,7 +241,7 @@ public class NeighberhoodSimulator {
 			if (pedestrian.isOnCrosswalk) {
 				executor.setInputValue(String.format("pedestrians[%d]", N*2), "true");
 			}
-			else if (pedestrian.position != -1 && pedestrian.position != 4){
+			else if (pedestrian.position >= 0 && pedestrian.position <= 3){
 				if(pedestrian.isInTheNorth)
 					executor.setInputValue(String.format("pedestrians[%d]", pedestrian.position), "true");
 				else
