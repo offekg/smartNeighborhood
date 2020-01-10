@@ -14,7 +14,6 @@ class Person {
     this.height = height;
     this.initBottomPersonY = initBottomPersonY;
     this.initTopPersonY = initTopPersonY;
-
     this.position = pedestrian.position;
     this.isInNorth = pedestrian.isInNorth;
     this.y = this.isInNorth ? initTopPersonY : initBottomPersonY;
@@ -32,7 +31,6 @@ class Person {
   animate(ctx){
     let animating = false;
     if (this.isOnCrosswalk) {
-      debugger;
       let toLeft = this.x > (this.canvasW / 2 + 3);
       let toRight = this.x < (this.canvasW / 2 - 3);
       if (toLeft || toRight) {
@@ -54,11 +52,11 @@ class Person {
       this.x -= Math.round((this.block + this.width / 2) / this.animationTime);
       animating = true;
     }
-    if (this.isInNorth && this.y < this.initBottomPersonY) {
-      this.y += Math.round(this.crosswalkLength / this.animationTime);
-      animating = true;
-    } else if (!this.isInNorth && this.y > this.initTopPersonY) {
+    if (this.isInNorth && this.y > this.initTopPersonY) {
       this.y -= Math.round(this.crosswalkLength / this.animationTime);
+      animating = true;
+    } else if (!this.isInNorth && this.y < this.initBottomPersonY) {
+      this.y += Math.round(this.crosswalkLength / this.animationTime);
       animating = true;
     }
     ctx.drawImage(this.currentImg, this.x, this.y, this.width, this.height);
