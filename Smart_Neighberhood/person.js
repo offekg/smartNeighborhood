@@ -32,23 +32,16 @@ class Person {
   animate(ctx){
     let animating = false;
     if (this.isOnCrosswalk) {
+      debugger;
       let toLeft = this.x > (this.canvasW / 2 + 3);
       let toRight = this.x < (this.canvasW / 2 - 3);
       if (toLeft || toRight) {
         if (toRight) {
-          this.x += 2*Math.round((this.block + this.width / 2) / this.animationTime);
+          this.x += Math.round((this.block + this.width / 2) / this.animationTime);
           animating = true;
         }
         if (toLeft) {
-          this.x -= 2*Math.round((this.block + this.width / 2) / this.animationTime);
-          animating = true;
-        }
-      } else {
-        if (this.isInNorth && this.y < this.initBottomPersonY) {
-          this.y += Math.round(2 * this.crosswalkLength / this.animationTime);
-          animating = true;
-        } else if (!this.isInNorth && this.y > this.initTopPersonY) {
-          this.y -= Math.round(2 * this.crosswalkLength / this.animationTime);
+          this.x -= Math.round((this.block + this.width / 2) / this.animationTime);
           animating = true;
         }
       }
@@ -59,6 +52,13 @@ class Person {
     } else if (this.x > this.position * this.block + this.block / 2 - (this.width / 2) + 2) {
       this.currentImg = personImgRev;
       this.x -= Math.round((this.block + this.width / 2) / this.animationTime);
+      animating = true;
+    }
+    if (this.isInNorth && this.y < this.initBottomPersonY) {
+      this.y += Math.round(this.crosswalkLength / this.animationTime);
+      animating = true;
+    } else if (!this.isInNorth && this.y > this.initTopPersonY) {
+      this.y -= Math.round(this.crosswalkLength / this.animationTime);
       animating = true;
     }
     ctx.drawImage(this.currentImg, this.x, this.y, this.width, this.height);
