@@ -91,7 +91,7 @@ function updateMode() {
 }
 
 function resetSpectra() {
-  $.post("api/reset");
+  //$.post("api/reset");
 }
 
 function getNextState() {

@@ -266,6 +266,7 @@ public class SocketServer {
 		}
 
 		else if (path.contains("api/scenario")) {
+			sim.canScenarioStart = false;
 			int scenarioiNum = (int) dataDict.get("scenario");
 			spectraVarsToJson(scenarioiNum, null);
 			createAndSendResponseToClient(socket, "", (Boolean) dataDict.get("isClientChrome"));
@@ -275,8 +276,10 @@ public class SocketServer {
 
 		else if (path.contains("api")) {
 			if ((Boolean) dataDict.get("data_exists") == true) {
-				if (dataDict.containsKey("mode"))
+				if (dataDict.containsKey("mode")) {
+					sim.canScenarioStart = false;
 					setNewUserModeAccordingToUserRequest((String) dataDict.get("mode"));
+				}
 				else
 					sim.updateEnvVarsFromClient(dataDict);
 				createAndSendResponseToClient(socket, "", (Boolean) dataDict.get("isClientChrome"));

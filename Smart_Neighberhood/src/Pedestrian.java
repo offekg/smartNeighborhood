@@ -34,7 +34,7 @@ public class Pedestrian {
 				if (position < 1)
 					nextPosition = position + 1;
 				else
-					nextPosition = position + 1;
+					nextPosition = position - 1;
 				
 				if (nextPosition >= 1 && nextPosition <= 2)
 					isAppeared = true;
