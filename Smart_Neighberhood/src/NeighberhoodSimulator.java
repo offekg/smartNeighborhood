@@ -200,8 +200,13 @@ public class NeighberhoodSimulator {
 		
 		if (pedestrians.size() != 0)
 			return;
+		
+		if (garbageTruckNorth_location != N)
+			return;
+		
+		if (garbageTruckSouth_location != N)
+			return;
 
-		sim_itter = 0;
 		canScenarioStart = true;
 	}
 
