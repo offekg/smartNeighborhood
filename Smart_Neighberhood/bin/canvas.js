@@ -388,7 +388,7 @@ function paintArrow(left, top, width, height, isLeft) {
 }
 
 $(document).ready(function(){
-  resetSpectra();
+  // resetSpectra();
   updateMode();
   getNextState();
 });

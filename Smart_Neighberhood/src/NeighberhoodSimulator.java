@@ -256,7 +256,8 @@ public class NeighberhoodSimulator {
 		
 		System.out.println(Arrays.toString(garbageCansNorth));
 		System.out.println(Arrays.toString(garbageCansSouth));
-		System.out.println(Arrays.toString(pedestrians.toArray()));
+		for (Pedestrian p : pedestrians)
+			System.out.println(p.getPedestrianState());
 		System.out.println(garbageTruckNorth_location);
 		System.out.println(garbageTruckSouth_location);
 		System.out.println(isCleaningN);
