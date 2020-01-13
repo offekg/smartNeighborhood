@@ -69,50 +69,50 @@ public class NeighberhoodSimulator {
 		}
 
 	}
-	
+
 	private void printPedestLights() {
-		if(dayTime == DayTimeMode.DAY)
+		if (dayTime == DayTimeMode.DAY)
 			return;
 		String spaces;
 		System.out.println();
 		System.out.print("	");
-		for(int i = 0; i < N-1; i++) {
-			if (lightsNorth[i]) 
-				System.out.print(String.format("LN%d+		",i));
+		for (int i = 0; i < N - 1; i++) {
+			if (lightsNorth[i])
+				System.out.print(String.format("LN%d+		", i));
 			else
-				System.out.print(String.format("LN%d-		",i));
+				System.out.print(String.format("LN%d-		", i));
 		}
 		System.out.println();
-		for(Pedestrian p : pedestrians) {
-			if(p.isInTheNorth && !p.isOnCrosswalk ) {
-				
-				if(p.position == -1)
+		for (Pedestrian p : pedestrians) {
+			if (p.isInTheNorth && !p.isOnCrosswalk) {
+
+				if (p.position == -1)
 					spaces = "";
 				else
-					spaces = String.join("",Collections.nCopies((p.position)*4, "    "));
+					spaces = String.join("", Collections.nCopies((p.position) * 4, "    "));
 				System.out.println(spaces + "P" + p.position);
 			}
 		}
 		System.out.println();
-		for(Pedestrian p3 : pedestrians) {
-			if(p3.isOnCrosswalk)
+		for (Pedestrian p3 : pedestrians) {
+			if (p3.isOnCrosswalk)
 				System.out.println("				P in Crosswalk");
-		System.out.println();
+			System.out.println();
 		}
 		System.out.print("	");
-		for(int i = 0; i < N-1; i++) {
-			if (lightsSouth[i]) 
-				System.out.print(String.format("LS%d+		",i));
+		for (int i = 0; i < N - 1; i++) {
+			if (lightsSouth[i])
+				System.out.print(String.format("LS%d+		", i));
 			else
-				System.out.print(String.format("LS%d-		",i));
+				System.out.print(String.format("LS%d-		", i));
 		}
 		System.out.println();
-		for(Pedestrian p2 : pedestrians) {
-			if(!p2.isInTheNorth && !p2.isOnCrosswalk && p2.position != -1) {
-				if(p2.position == -1)
+		for (Pedestrian p2 : pedestrians) {
+			if (!p2.isInTheNorth && !p2.isOnCrosswalk && p2.position != -1) {
+				if (p2.position == -1)
 					spaces = "";
 				else
-					spaces = String.join("",Collections.nCopies((p2.position)*4, "    "));
+					spaces = String.join("", Collections.nCopies((p2.position) * 4, "    "));
 				System.out.println(spaces + "P" + p2.position);
 			}
 		}
@@ -121,13 +121,9 @@ public class NeighberhoodSimulator {
 
 	public HashMap<String, HashMap<String, Object>> getNextState(int scenario_num,
 			HashMap<String, Object> dataFromClient) {
-		if (!canScenarioStart) {
-			dayTime = DayTimeMode.DAY;
-			energyEfficiencyMode = false;
-			scenario_num = 11;
-			dataFromClient = null;
-		}
-		
+		if (!canScenarioStart)
+			scenario_num = 12;
+
 		switch (scenario_num) {
 		case 0:
 			return null;
@@ -168,12 +164,18 @@ public class NeighberhoodSimulator {
 			moveAllPedestrians();
 			updateEnvVarsFromClient(dataFromClient);
 			break;
+		case 12: // wait for default state
+			dayTime = DayTimeMode.DAY;
+			energyEfficiencyMode = false;
+			moveAllPedestrians();
+			break;
 		case 100: // get scenario next state or random when scenario done
 			HashMap<String, Object> nextState = scenario.getNextState();
 			if (nextState != null)
 				updateEnvVarsFromClient(nextState);
 			else
 				randomNextState();
+			break;
 		}
 
 		try {
@@ -183,13 +185,14 @@ public class NeighberhoodSimulator {
 		} catch (ControllerExecutorException e) {
 			// TODO: handle it gracefully.h{
 			System.out.println("Update to spectra failed due to an unknown reason");
+			System.exit(1);
 		}
 
 		if (!canScenarioStart)
 			isInDefaultState();
 		return getSpectraVarsAsDict();
 	}
-	
+
 	private void isInDefaultState() {
 		for (int i = 0; i < N; i++) {
 			if (garbageCansNorth[i] == true)
@@ -197,17 +200,18 @@ public class NeighberhoodSimulator {
 			if (garbageCansSouth[i] == true)
 				return;
 		}
-		
+
 		if (pedestrians.size() != 0)
 			return;
-		
+
 		if (garbageTruckNorth_location != N)
 			return;
-		
+
 		if (garbageTruckSouth_location != N)
 			return;
 
 		canScenarioStart = true;
+		sim_itter = 0;
 	}
 
 	private void setEnvVarsToDefault() {
@@ -215,7 +219,7 @@ public class NeighberhoodSimulator {
 			garbageCansNorth[i] = false;
 			garbageCansSouth[i] = false;
 		}
-		
+
 		dayTime = DayTimeMode.DAY;
 		energyEfficiencyMode = false;
 		pedestrians = new ArrayList<>();
@@ -225,6 +229,39 @@ public class NeighberhoodSimulator {
 
 	private void updateEnvVarsInSpectra() throws ControllerExecutorException {
 		System.out.println("Updating environment variables in Spectra");
+
+		System.out.println(Arrays.toString(garbageCansNorth));
+		System.out.println(Arrays.toString(garbageCansSouth));
+		for (Pedestrian p : pedestrians)
+			System.out.println(p.getPedestrianState());
+		System.out.println(garbageTruckNorth_location);
+		System.out.println(garbageTruckSouth_location);
+		System.out.println(isCleaningN);
+		System.out.println(isCleaningS);
+		System.out.println("--------------------");
+		try {
+			for (int i = 0; i < N; i++) {
+				System.out
+						.println(Boolean.parseBoolean(executor.getCurValue(String.format("garbageCansNorth[%d]", i))));
+			}
+			System.out.println("+++++++");
+			for (int i = 0; i < N; i++) {
+				System.out
+						.println(Boolean.parseBoolean(executor.getCurValue(String.format("garbageCansSouth[%d]", i))));
+			}
+			System.out.println("+++++++");
+
+			for (int i = 0; i < 2 * N + 1; i++) {
+				System.out
+						.println(Boolean.parseBoolean(executor.getCurValue(String.format("pedestrians[%d]", i))));
+			}
+			System.out.println("+++++++");
+
+			System.out.println(Integer.parseInt(executor.getCurValue("garbageTruckNorth_location")));
+			System.out.println(Integer.parseInt(executor.getCurValue("garbageTruckSouth_location")));
+		} catch (Exception e) {
+			System.out.println("shit");
+		}
 
 		for (int i = 0; i < N; i++) {
 			executor.setInputValue(String.format("garbageCansNorth[%d]", i), String.valueOf(garbageCansNorth[i]));
@@ -237,33 +274,23 @@ public class NeighberhoodSimulator {
 
 		executor.setInputValue("dayTime", String.valueOf(dayTime));
 		executor.setInputValue("energyEfficiencyMode", String.valueOf(energyEfficiencyMode));
-		
-		//first set all spectra pedestrian spaces to false, and then update from all pedestrians
-		for (int i = 0; i < N*2 + 1; i++) {
+
+		// first set all spectra pedestrian spaces to false, and then update from all
+		// pedestrians
+		for (int i = 0; i < N * 2 + 1; i++) {
 			executor.setInputValue(String.format("pedestrians[%d]", i), "false");
 		}
 		for (Pedestrian pedestrian : pedestrians) {
 			if (pedestrian.isOnCrosswalk) {
-				executor.setInputValue(String.format("pedestrians[%d]", N*2), "true");
-			}
-			else if (pedestrian.position >= 0 && pedestrian.position <= 3){
-				if(pedestrian.isInTheNorth)
+				executor.setInputValue(String.format("pedestrians[%d]", N * 2), "true");
+			} else if (pedestrian.position >= 0 && pedestrian.position <= 3) {
+				if (pedestrian.isInTheNorth)
 					executor.setInputValue(String.format("pedestrians[%d]", pedestrian.position), "true");
 				else
 					executor.setInputValue(String.format("pedestrians[%d]", pedestrian.position + N), "true");
 			}
 		}
-		
-		System.out.println(Arrays.toString(garbageCansNorth));
-		System.out.println(Arrays.toString(garbageCansSouth));
-		for (Pedestrian p : pedestrians)
-			System.out.println(p.getPedestrianState());
-		System.out.println(garbageTruckNorth_location);
-		System.out.println(garbageTruckSouth_location);
-		System.out.println(isCleaningN);
-		System.out.println(isCleaningS);
 
-		
 		executor.updateState(true, true);
 	}
 
@@ -272,16 +299,16 @@ public class NeighberhoodSimulator {
 
 		isCleaningN = Boolean.parseBoolean(executor.getCurValue("isCleaningN"));
 		isCleaningS = Boolean.parseBoolean(executor.getCurValue("isCleaningS"));
-		
+
 		for (int i = 0; i < N - 1; i++) {
-			lightsNorth[i] = Boolean.parseBoolean(executor.getCurValue(String.format("lights[%d]",i)));
-			lightsSouth[i] = Boolean.parseBoolean(executor.getCurValue(String.format("lights[%d]",i + N-1)));
+			lightsNorth[i] = Boolean.parseBoolean(executor.getCurValue(String.format("lights[%d]", i)));
+			lightsSouth[i] = Boolean.parseBoolean(executor.getCurValue(String.format("lights[%d]", i + N - 1)));
 		}
-		
+
 		garbageTruckNorth_location = Integer.parseInt(executor.getCurValue("garbageTruckNorth_location"));
 		garbageTruckSouth_location = Integer.parseInt(executor.getCurValue("garbageTruckSouth_location"));
 	}
-	
+
 	private void addRandomPedestrian() {
 		int startPosition = random.nextInt(2);
 		if (startPosition == 0)
@@ -289,7 +316,7 @@ public class NeighberhoodSimulator {
 		else
 			addNewPedestrian(4, random.nextBoolean());
 	}
-	
+
 	private void addRandomPedestrianFromClient() {
 		int startPosition = random.nextInt(2);
 		if (startPosition == 0)
@@ -391,7 +418,7 @@ public class NeighberhoodSimulator {
 		HashMap<String, HashMap<String, Object>> current_full_state = new HashMap<>();
 		current_full_state.put("environment", current_environment_state);
 		current_full_state.put("system", current_system_state);
-		
+
 		return current_full_state;
 	}
 
@@ -420,7 +447,7 @@ public class NeighberhoodSimulator {
 				}
 				break;
 			case "dayTime":
-				dayTime = (DayTimeMode.valueOf((String) dataFromClient.get("dayTime"))) ;
+				dayTime = (DayTimeMode.valueOf((String) dataFromClient.get("dayTime")));
 				break;
 			case "energyEfficiencyMode":
 				energyEfficiencyMode = (boolean) dataFromClient.get("energyEfficiencyMode");
