@@ -108,8 +108,8 @@ define crossing := pedestrians[PEDEST_WALK_SIZE-1];
 //gar all_lights_off;
 gar garbageTruckNorth_location = N;
 gar garbageTruckSouth_location = N;
-gar !isCleaningN;
-gar !isCleaningS;
+//gar !isCleaningN;  - vacuity
+//gar !isCleaningS;  - vacuity
 
 //***truck Guarantees***
 //If truck is before crosswalk, and someone is crossing, then it won't move
