@@ -36,7 +36,9 @@ public class NeighberhoodSimulator {
 
 	/***** Environment variables *****/
 	private boolean[] garbageCansNorth = new boolean[N];
+	private boolean[] garbageCansNorthJustCleaned = new boolean[N];
 	private boolean[] garbageCansSouth = new boolean[N];
+	private boolean[] garbageCansSouthJustCleaned = new boolean[N];
 	private DayTimeMode dayTime;
 	private boolean energyEfficiencyMode;
 	private List<Pedestrian> pedestrians = new ArrayList<>();
@@ -119,14 +121,8 @@ public class NeighberhoodSimulator {
 		System.out.println();
 	}
 
-	public HashMap<String, HashMap<String, Object>> getNextState(int scenario_num,
-			HashMap<String, Object> dataFromClient) {
-		if (!canScenarioStart)
-			scenario_num = 12;
-
+	public void initiateScenarios(int scenario_num) {
 		switch (scenario_num) {
-		case 0:
-			return null;
 		case 1: // initiate scenario number 1
 			scenario = new ScenarioManager(1);
 			break;
@@ -151,6 +147,14 @@ public class NeighberhoodSimulator {
 		case 8: // initiate scenario number 8
 			scenario = new ScenarioManager(8);
 			break;
+		}
+	}
+
+	public HashMap<String, HashMap<String, Object>> getNextState(int mode, HashMap<String, Object> dataFromClient) {
+		if (!canScenarioStart)
+			mode = 12;
+
+		switch (mode) {
 		case 9: // random mode.
 			moveAllPedestrians();
 			randomNextState();
@@ -171,6 +175,7 @@ public class NeighberhoodSimulator {
 			break;
 		case 100: // get scenario next state or random when scenario done
 			HashMap<String, Object> nextState = scenario.getNextState();
+			moveAllPedestrians();
 			if (nextState != null)
 				updateEnvVarsFromClient(nextState);
 			else
@@ -217,7 +222,9 @@ public class NeighberhoodSimulator {
 	private void setEnvVarsToDefault() {
 		for (int i = 0; i < N; i++) {
 			garbageCansNorth[i] = false;
+			garbageCansNorthJustCleaned[i] = false;
 			garbageCansSouth[i] = false;
+			garbageCansSouthJustCleaned[i] = false;
 		}
 
 		dayTime = DayTimeMode.DAY;
@@ -239,37 +246,22 @@ public class NeighberhoodSimulator {
 		System.out.println(isCleaningN);
 		System.out.println(isCleaningS);
 		System.out.println("--------------------");
-		try {
-			for (int i = 0; i < N; i++) {
-				System.out
-						.println(Boolean.parseBoolean(executor.getCurValue(String.format("garbageCansNorth[%d]", i))));
-			}
-			System.out.println("+++++++");
-			for (int i = 0; i < N; i++) {
-				System.out
-						.println(Boolean.parseBoolean(executor.getCurValue(String.format("garbageCansSouth[%d]", i))));
-			}
-			System.out.println("+++++++");
-
-			for (int i = 0; i < 2 * N + 1; i++) {
-				System.out
-						.println(Boolean.parseBoolean(executor.getCurValue(String.format("pedestrians[%d]", i))));
-			}
-			System.out.println("+++++++");
-
-			System.out.println(Integer.parseInt(executor.getCurValue("garbageTruckNorth_location")));
-			System.out.println(Integer.parseInt(executor.getCurValue("garbageTruckSouth_location")));
-		} catch (Exception e) {
-			System.out.println("shit");
-		}
 
 		for (int i = 0; i < N; i++) {
+			garbageCansNorthJustCleaned[i] = false;
+			if (garbageCansNorth[i] == true && garbageTruckNorth_location == i && isCleaningN) {
+				garbageCansNorth[i] = false;
+				garbageCansNorthJustCleaned[i] = true;
+				System.out.println("Cleaned north at position " + i);
+			}
+			garbageCansSouthJustCleaned[i] = false;
+			if (garbageCansSouth[i] == true && garbageTruckSouth_location == i && isCleaningS) {
+				System.out.println("Cleaned south at position " + i);
+				garbageCansSouthJustCleaned[i] = true;
+				garbageCansSouth[i] = false;
+			}
 			executor.setInputValue(String.format("garbageCansNorth[%d]", i), String.valueOf(garbageCansNorth[i]));
 			executor.setInputValue(String.format("garbageCansSouth[%d]", i), String.valueOf(garbageCansSouth[i]));
-			if (garbageCansNorth[i] == true && garbageTruckNorth_location == i && isCleaningN)
-				garbageCansNorth[i] = false;
-			if (garbageCansSouth[i] == true && garbageTruckSouth_location == i && isCleaningS)
-				garbageCansSouth[i] = false;
 		}
 
 		executor.setInputValue("dayTime", String.valueOf(dayTime));
@@ -291,7 +283,11 @@ public class NeighberhoodSimulator {
 			}
 		}
 
+		System.out.println("$$$$$$$$$$");
+		System.out.println(executor.getCurInputs());
 		executor.updateState(true, true);
+		System.out.println("#########");
+		System.out.println(executor.getCurOutputs());
 	}
 
 	private void updateSystemVarsFromSpectra() throws ControllerExecutorException {
@@ -370,14 +366,26 @@ public class NeighberhoodSimulator {
 			if (garbageCansNorth[i] == true && garbageTruckNorth_location == i && isCleaningN)
 				garbageCansNorth[i] = false;
 			else {
-				if (garbageCansNorth[i] == false && random.nextInt(10) == 0) // 1:10 chance of trash can becoming full
+				if (garbageCansNorth[i] == false && !garbageCansNorthJustCleaned[i] && random.nextInt(10) == 0) // 1:10
+																												// chance
+																												// of
+																												// trash
+																												// can
+																												// becoming
+																												// full
 					garbageCansNorth[i] = true;
 			}
 
 			if (garbageCansSouth[i] == true && garbageTruckSouth_location == i && isCleaningS)
 				garbageCansSouth[i] = false;
 			else {
-				if (garbageCansSouth[i] == false && random.nextInt(10) == 0) // 1:10 chance of trash can becoming full
+				if (garbageCansSouth[i] == false && !garbageCansSouthJustCleaned[i] && random.nextInt(10) == 0) // 1:10
+																												// chance
+																												// of
+																												// trash
+																												// can
+																												// becoming
+																												// full
 					garbageCansSouth[i] = true;
 			}
 		}
@@ -429,7 +437,12 @@ public class NeighberhoodSimulator {
 		for (String var : dataFromClient.keySet()) {
 			switch (var) {
 			case "pedestrian":
-				addRandomPedestrianFromClient();
+				try {
+					Object[] pedestrian = (Object[]) dataFromClient.get("pedestrian");
+					addNewPedestrian((int) pedestrian[0], (boolean) pedestrian[1]);
+				} catch (ClassCastException e) {
+					addRandomPedestrianFromClient();
+				}
 				break;
 			case "garbageCansNorth":
 				try {

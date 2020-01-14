@@ -26,28 +26,26 @@ public class ScenarioManager {
 		case 5:
 			loadScenario5();
 			break;
-		case 6:
-			loadScenario6();
-			break;
-		case 7:
-			loadScenario7();
-			break;
-		case 8:
-			loadScenario8();
-			break;
 		}
 	}
 
 	private void addStateToQueue(int pedestrianStartPos, boolean pedestrianIsNorth, boolean[] garbageCansNorth,
-			boolean[] garbageCansSouth, DayTimeMode dayTime, boolean energyEfficiencyMode) {
+			boolean[] garbageCansSouth, String dayTime, boolean energyEfficiencyMode) {
 
 		HashMap<String, Object> state = new HashMap<String, Object>();
 
-		if (pedestrianStartPos != -1)
+		if (pedestrianStartPos != 100)
 			state.put("pedestrian", new Object[] { pedestrianStartPos, pedestrianIsNorth });
-		state.put("garbageCansNorth", garbageCansNorth);
-		state.put("garbageCansSouth", garbageCansSouth);
-		state.put("dayTime", dayTime);
+		
+		if (garbageCansNorth != null)
+			state.put("garbageCansNorth", garbageCansNorth);
+		
+		if (garbageCansSouth != null)
+			state.put("garbageCansSouth", garbageCansSouth);
+		
+		if (dayTime != "")
+			state.put("dayTime", dayTime);
+		
 		state.put("energyEfficiencyMode", energyEfficiencyMode);
 
 		scenarioQueue.add(state);
@@ -59,49 +57,45 @@ public class ScenarioManager {
 
 	private void loadScenario1() {
 		// example
-		addStateToQueue(0, true, new boolean[] { false, false, false, false },
-				new boolean[] { false, false, false, false }, DayTimeMode.DAY, false);
+		addStateToQueue(-1, true, null, null, "NIGHT", true);
+		addStateToQueue(4, false, null, null, "NIGHT", true);
+		addStateToQueue(4, true, null, null, "NIGHT", true);
+		addStateToQueue(-1, false, null, null, "NIGHT", true);
+		
+		addStateToQueue(100, true, null, null, "", true);
+		addStateToQueue(100, true, null, null, "", true);
+		addStateToQueue(100, true, null, null, "", true);
+		addStateToQueue(100, true, null, null, "", true);
+		addStateToQueue(100, true, null, null, "", true);
+		addStateToQueue(100, true, null, null, "", true);
+		addStateToQueue(100, true, null, null, "", true);
+		addStateToQueue(100, true, null, null, "", true);
+		addStateToQueue(100, true, null, null, "", true);
+		addStateToQueue(100, true, null, null, "", true);
+		addStateToQueue(100, true, null, null, "", true);
 	}
 
 	private void loadScenario2() {
 		// example
 		addStateToQueue(-1, true, new boolean[] { false, false, false, false },
-				new boolean[] { false, false, false, false }, DayTimeMode.DAY, false);
+				new boolean[] { false, false, false, false }, "DAY", false);
 	}
 
 	private void loadScenario3() {
 		// example
 		addStateToQueue(0, true, new boolean[] { false, false, false, false },
-				new boolean[] { false, false, false, false }, DayTimeMode.DAY, false);
+				new boolean[] { false, false, false, false }, "DAY", false);
 	}
 
 	private void loadScenario4() {
 		// example
 		addStateToQueue(0, true, new boolean[] { false, false, false, false },
-				new boolean[] { false, false, false, false }, DayTimeMode.DAY, false);
+				new boolean[] { false, false, false, false }, "DAY", false);
 	}
 
 	private void loadScenario5() {
 		// example
 		addStateToQueue(-1, true, new boolean[] { false, false, false, false },
-				new boolean[] { false, false, false, false }, DayTimeMode.DAY, false);
-	}
-
-	private void loadScenario6() {
-		// example
-		addStateToQueue(-1, true, new boolean[] { false, false, false, false },
-				new boolean[] { false, false, false, false }, DayTimeMode.DAY, false);
-	}
-
-	private void loadScenario7() {
-		// example
-		addStateToQueue(0, true, new boolean[] { false, false, false, false },
-				new boolean[] { false, false, false, false }, DayTimeMode.DAY, false);
-	}
-
-	private void loadScenario8() {
-		// example
-		addStateToQueue(0, true, new boolean[] { false, false, false, false },
-				new boolean[] { false, false, false, false }, DayTimeMode.DAY, false);
+				new boolean[] { false, false, false, false }, "DAY", false);
 	}
 }

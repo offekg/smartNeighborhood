@@ -260,18 +260,18 @@ public class SocketServer {
 	}
 	
 	private static void handlePostRequest(String path, Socket socket, HashMap<String, Object> dataDict) {
-		if (path.contains("api/reset")) {
-			spectraVarsToJson(0, null);
-			createAndSendResponseToClient(socket, "", (Boolean) dataDict.get("isClientChrome"));
-		}
+//		if (path.contains("api/reset")) {
+//			spectraVarsToJson(0, null);
+//			createAndSendResponseToClient(socket, "", (Boolean) dataDict.get("isClientChrome"));
+//		}
 
-		else if (path.contains("api/scenario")) {
+		if (path.contains("api/scenario")) {
 			sim.canScenarioStart = false;
-			int scenarioiNum = (int) dataDict.get("scenario");
-			spectraVarsToJson(scenarioiNum, null);
+			int scenarioNum = (int) dataDict.get("scenario");
+			sim.initiateScenarios(scenarioNum);
 			createAndSendResponseToClient(socket, "", (Boolean) dataDict.get("isClientChrome"));
 			mode = userMode.SCENARIO;
-			colorMe(messageTypes.INFO, "Switching to scenario: " + scenarioiNum, false);
+			colorMe(messageTypes.INFO, "Switching to scenario: " + scenarioNum, false);
 		}
 
 		else if (path.contains("api")) {

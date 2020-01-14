@@ -22,7 +22,7 @@ function startScenario(number) {
 
 function setMode(mode) {
   callback = function() {
-    location.reload();
+    // location.reload();
   };
   postToApi("{mode:" + mode + "}",callback);
 }
