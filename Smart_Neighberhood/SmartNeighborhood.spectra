@@ -108,8 +108,8 @@ define crossing := pedestrians[PEDEST_WALK_SIZE-1];
 //gar all_lights_off;
 gar garbageTruckNorth_location = N;
 gar garbageTruckSouth_location = N;
-//gar !isCleaningN;  - vacuity
-//gar !isCleaningS;  - vacuity
+gar !isCleaningN;  //- vacuity
+gar !isCleaningS;  //- vacuity
 
 //***truck Guarantees***
 //If truck is before crosswalk, and someone is crossing, then it won't move
@@ -229,8 +229,8 @@ gar G (garbageTruckNorth_location != N) -> ((next(garbageTruckNorth_location) = 
 gar G (garbageTruckSouth_location != N) -> ((next(garbageTruckSouth_location) = garbageTruckSouth_location) | (next(garbageTruckSouth_location) = (garbageTruckSouth_location + 1)));
 
 //Trucks not on road, can only appear at can 0.
-gar G garbageTruckNorth_location = N -> (next(garbageTruckNorth_location) = 0 | next(garbageTruckNorth_location) = N);
-gar G garbageTruckSouth_location = N -> (next(garbageTruckSouth_location) = 0 | next(garbageTruckSouth_location) = N);
+gar G (garbageTruckNorth_location = N) -> (next(garbageTruckNorth_location) = 0 | next(garbageTruckNorth_location) = N);
+gar G (garbageTruckSouth_location = N) -> (next(garbageTruckSouth_location) = 0 | next(garbageTruckSouth_location) = N);
 
 //Truck on empty can will keep moving
 // pattern pResponsetoS????
@@ -254,11 +254,17 @@ weight -1
 weight 1 
 	!(garbageTruckNorth_location = N) & at_least_one_can_full_north;
 	
-//use trigger to enforce south truck to wait if no can is full.
+gar G (!at_least_one_can_full_north & (garbageTruckNorth_location = N)) -> (next(garbageTruckNorth_location) = N);
+
+//use trigger to enforce south truck to wait if no can is full, and to leave if at least one is full. 
 define at_least_one_can_full_south := 
-	garbageCansSouth[0] | garbageCansSouth[1] | garbageCansSouth[2] | garbageCansSouth[3];
+	(garbageCansSouth[0] | garbageCansSouth[1] | garbageCansSouth[2] | garbageCansSouth[3]);
+define all_cans_empty_south :=
+	(!garbageCansSouth[0] & !garbageCansSouth[1] & !garbageCansSouth[2] & !garbageCansSouth[3]);
 	
-gar trig [true]*[!at_least_one_can_full_south] |=> [garbageTruckSouth_location = N]+;
+//gar trig [true]*[all_cans_empty_south & (garbageTruckSouth_location = N)] |=> [garbageTruckSouth_location = N];
+gar G (all_cans_empty_south & (garbageTruckSouth_location = N)) -> (next(garbageTruckSouth_location) = N);
+gar trig [true]*[at_least_one_can_full_south & (garbageTruckSouth_location = N)] |=> [garbageTruckSouth_location = 0]+;
 	
 //Truck efficiency mode	
 /* 
