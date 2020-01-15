@@ -21,6 +21,7 @@ function setGarbage(index, isBottom) {
 function startScenario(number) {
   postHttpReqest("api/scenario", "data: {scenario:" + number + "}");
   updateButtons("AUTOMATIC");
+  currentMode = "AUTOMATIC"
 }
 
 function updateButtons(mode) {
