@@ -3,7 +3,6 @@ package src;
 import java.util.Queue;
 import java.util.HashMap;
 import java.util.LinkedList;
-import src.NeighberhoodSimulator.DayTimeMode;
 
 public class ScenarioManager {
 	Queue<HashMap<String, Object>> scenarioQueue;

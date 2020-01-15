@@ -13,7 +13,6 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.util.StringTokenizer;
 import java.io.OutputStreamWriter;
-import java.awt.image.ColorModel;
 import java.io.BufferedOutputStream;
 import java.lang.ClassNotFoundException;
 import java.nio.charset.StandardCharsets;
@@ -45,22 +44,23 @@ public class SocketServer {
 	private static NeighberhoodSimulator sim;
 	private static final File WEB_ROOT = new File(".");
 	private static final String DEFAULT_FILE = "index.html";
+	private static final String LOG_FILE = "Log.html";
 
+	private static String dataSendingMessage = "Sent data:";
 	private static String headerPrefixSuffix = "================";
-	private static String creatingSpectraObject = "Creating Spectra object";
-	private static String spectraObjectCreated = "Spectra object created successfully";
-	private static String noDataPayloadMessage = "No data payload attached";
+	private static String dataReceivingMessage = "Received data:";
+	private static String failedToJson = "Could not load data to JSON";
 	private static String waitingMessage = "Waiting for client request";
 	private static String connectionReceivedMessage = "Request received";
+	private static String issueWithMessage = "Issue found with variable ";
 	private static String connectionEndedMessage = "Request fully handled";
-	private static String dataReceivingMessage = "Received data:";
-	private static String dataSendingMessage = "Sent data:";
+	private static String creatingSpectraObject = "Creating Spectra object";
+	private static String noDataPayloadMessage = "No data payload attached";
 	private static String shutdownMessage = "Shutting down Socket server!!";
 	private static String notWellFormattedMessage = "Data is not well formated";
-	private static String issueWithMessage = "Issue found with variable ";
-	private static String inputError = "Encountered an issue with request from cloent - " + "ignoring request";
+	private static String spectraObjectCreated = "Spectra object created successfully";
 	private static String outputError = "Encountered an issue with response to cloent";
-	private static String failedToJson = "Could not load data to JSON";
+	private static String inputError = "Encountered an issue with request from cloent - ignoring request";
 
 	private static int houseCount = 4;
 	private static String[] envVars = new String[] { "pedestrian", "garbageCansNorth", "garbageCansSouth", "dayTime",
@@ -197,8 +197,11 @@ public class SocketServer {
 	/*******************************************************************************/
 
 	private static void newConnectionFound(Socket socket, StringTokenizer parse, String path) throws IOException {
-		if (path.endsWith("/"))
+		if (path.contains("log"))
+			path = LOG_FILE;
+		else if (path.endsWith("/"))
 			path += DEFAULT_FILE;
+		 
 		File file = new File(WEB_ROOT, path);
 		int fileLength = (int) file.length();
 		String content = getContentType(path);
@@ -268,16 +271,18 @@ public class SocketServer {
 						(Boolean) dataDict.get("isClientChrome"));
 		} 
 		
+		else if (path.contains("log")) {
+			Logger log = new Logger();
+    		log.createLog();
+    		
+    		newConnectionFound(socket, parse, path);
+		}
+		
 		else
 			newConnectionFound(socket, parse, path);
 	}
 	
 	private static void handlePostRequest(String path, Socket socket, HashMap<String, Object> dataDict) {
-//		if (path.contains("api/reset")) {
-//			spectraVarsToJson(0, null);
-//			createAndSendResponseToClient(socket, "", (Boolean) dataDict.get("isClientChrome"));
-//		}
-
 		if (path.contains("api/scenario")) {
 			sim.canScenarioStart = false;
 			int scenarioNum = (int) dataDict.get("scenario");

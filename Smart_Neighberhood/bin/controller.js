@@ -1,3 +1,5 @@
+let currentMode;
+
 function postHttpReqest(url, content, callback = function(){}) {
   let xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = callback;
@@ -18,22 +20,28 @@ function setGarbage(index, isBottom) {
 
 function startScenario(number) {
   postHttpReqest("api/scenario", "data: {scenario:" + number + "}");
+  updateButtons("AUTOMATIC");
 }
 
 function updateButtons(mode) {
-  $("#" + mode).addClass("active");
-  $("#" + mode + " input").attr('checked', 'checked');
-  if (mode === "AUTOMATIC") {
-    $("button").not('#dropdownMenuButton').attr("disabled", true);
-  }
+  let defaultModes = ["MANUAL", "AUTOMATIC", "SEMI"];
+  defaultModes.forEach(defaultMode => {
+    if (defaultMode === mode.toUpperCase()){
+      $("#" + defaultMode).addClass("active");
+      $("#" + defaultMode + " input").attr('checked', true);
+    } else {
+      $("#" + defaultMode).removeClass("active");
+      $("#" + defaultMode + " input").attr('checked', false);
+    }
+  });
+  $("button").not('#dropdownMenuButton').attr("disabled", (mode.toUpperCase() === "AUTOMATIC"));
 }
-
 
 function setMode(mode) {
   callback = function() {
     if (this.readyState == 4 && this.status == 200) {
-      console.log(this.responseText);
-      updateButtons(this.resetAnimation);
+      updateButtons(mode);
+      currentMode = mode.toUpperCase();
     }
   };
   postToApi("{mode:" + mode + "}",callback);

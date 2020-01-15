@@ -1,14 +1,14 @@
 package src;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.HashMap;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 
-import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONException;
 
 public class Logger {
 	private static String failedLog = "Failed creating LOG file";

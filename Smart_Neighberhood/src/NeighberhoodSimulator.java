@@ -1,26 +1,26 @@
 package src;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
+import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.json.JSONObject;
 
+import java.util.List;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 import src.ScenarioManager;
 import tau.smlab.syntech.executor.ControllerExecutor;
 import tau.smlab.syntech.executor.ControllerExecutorException;
 
 public class NeighberhoodSimulator {
-	private static String initiationFailed = "Error occured when trying to initiate controller";
-	private static String scenarioFinished = "Scenario inputs are done, it will run until default state";
-	private static String failedUpdateToSpectra = "Update to spectra failed due to an unknown reason";
 	private static String updaingToSpectra = "Updating environment variables in Spectra";
 	private static String fetchingFromSpectra = "Fetching system variables from Spectra";
+	private static String initiationFailed = "Error occured when trying to initiate controller";
+	private static String failedUpdateToSpectra = "Update to spectra failed due to an unknown reason";
+	private static String scenarioFinished = "Scenario inputs are done, it will run until default state";
 
 	private ControllerExecutor executor;
 	private Random random = new Random();

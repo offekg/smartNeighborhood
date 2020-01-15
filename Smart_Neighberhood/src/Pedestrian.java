@@ -1,16 +1,16 @@
 package src;
 
-import java.util.HashMap;
 import java.util.Random;
+import java.util.HashMap;
 
 public class Pedestrian {
 	int id;
 	int position;
+	int crossAlot;
+	boolean isAppeared;
 	boolean isInTheNorth;
 	boolean isOnCrosswalk;
 	boolean allowedToCross;
-	boolean isAppeared;
-	int crossAlot;
 
 	Random randomMoving = new Random();
 
