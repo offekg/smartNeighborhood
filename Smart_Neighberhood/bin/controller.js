@@ -20,9 +20,21 @@ function startScenario(number) {
   postHttpReqest("api/scenario", "data: {scenario:" + number + "}");
 }
 
+function updateButtons(mode) {
+  $("#" + mode).addClass("active");
+  $("#" + mode + " input").attr('checked', 'checked');
+  if (mode === "AUTOMATIC") {
+    $("button").not('#dropdownMenuButton').attr("disabled", true);
+  }
+}
+
+
 function setMode(mode) {
   callback = function() {
-    // location.reload();
+    if (this.readyState == 4 && this.status == 200) {
+      console.log(this.responseText);
+      updateButtons(this.resetAnimation);
+    }
   };
   postToApi("{mode:" + mode + "}",callback);
 }
@@ -45,11 +57,7 @@ $(document).ready(function(){
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       console.log(this.responseText);
-      $("#" + this.responseText).addClass("active");
-      $("#" + this.responseText + " input").attr('checked', 'checked');
-      if (this.responseText === "AUTOMATIC") {
-        $("button").not('#dropdownMenuButton').attr("disabled", true);
-      }
+      updateButtons(this.responseText);
     }
   };
   xhttp.open("GET", "/api/current_mode", true);

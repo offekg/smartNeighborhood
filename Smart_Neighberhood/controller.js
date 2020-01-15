@@ -1,3 +1,5 @@
+let currentMode;
+
 function postHttpReqest(url, content, callback = function(){}) {
   let xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = callback;
@@ -18,11 +20,29 @@ function setGarbage(index, isBottom) {
 
 function startScenario(number) {
   postHttpReqest("api/scenario", "data: {scenario:" + number + "}");
+  updateButtons("AUTOMATIC");
+}
+
+function updateButtons(mode) {
+  let defaultModes = ["MANUAL", "AUTOMATIC", "SEMI"];
+  defaultModes.forEach(defaultMode => {
+    if (defaultMode === mode.toUpperCase()){
+      $("#" + defaultMode).addClass("active");
+      $("#" + defaultMode + " input").attr('checked', true);
+    } else {
+      $("#" + defaultMode).removeClass("active");
+      $("#" + defaultMode + " input").attr('checked', false);
+    }
+  });
+  $("button").not('#dropdownMenuButton').attr("disabled", (mode.toUpperCase() === "AUTOMATIC"));
 }
 
 function setMode(mode) {
   callback = function() {
-    // location.reload();
+    if (this.readyState == 4 && this.status == 200) {
+      updateButtons(mode);
+      currentMode = mode.toUpperCase();
+    }
   };
   postToApi("{mode:" + mode + "}",callback);
 }
@@ -45,11 +65,7 @@ $(document).ready(function(){
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       console.log(this.responseText);
-      $("#" + this.responseText).addClass("active");
-      $("#" + this.responseText + " input").attr('checked', 'checked');
-      if (this.responseText === "AUTOMATIC") {
-        $("button").not('#dropdownMenuButton').attr("disabled", true);
-      }
+      updateButtons(this.responseText);
     }
   };
   xhttp.open("GET", "/api/current_mode", true);
