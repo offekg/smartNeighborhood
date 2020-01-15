@@ -10,6 +10,7 @@ public class Pedestrian {
 	boolean isOnCrosswalk;
 	boolean allowedToCross;
 	boolean isAppeared;
+	int crossAlot;
 
 	Random randomMoving = new Random();
 
@@ -20,6 +21,12 @@ public class Pedestrian {
 		this.isOnCrosswalk = false;
 		this.allowedToCross = true;
 		this.isAppeared = false;
+		this.crossAlot = 0;
+	}
+	
+	public Pedestrian(int id, int position, boolean isInTheNorth, int crossAlot) {
+		this(id, position, isInTheNorth);
+		this.crossAlot = crossAlot;
 	}
 
 	public void move(int isFreezeCrosswalk) {
@@ -41,7 +48,10 @@ public class Pedestrian {
 			} else {
 				if (allowedToCross && (position == 1 || position == 2)
 						&& !(isFreezeCrosswalk == 0 || isFreezeCrosswalk == 1)) {
-					int shouldCross = randomMoving.nextInt(2);
+					int shouldCross = randomMoving.nextInt(3);
+					if (crossAlot > 0)
+						shouldCross = 1;
+					
 					if (shouldCross == 1) {
 						isOnCrosswalk = true;
 						nextPosition = position;
@@ -64,6 +74,8 @@ public class Pedestrian {
 	
 	public int finishCross() {
 		isOnCrosswalk = false;
+		if (crossAlot-- > 0)
+			allowedToCross = true;
 		
 		return randomMoving.nextInt(2) + 1;
 	}

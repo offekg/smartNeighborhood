@@ -308,21 +308,21 @@ public class NeighberhoodSimulator {
 	private void addRandomPedestrian() {
 		int startPosition = random.nextInt(2);
 		if (startPosition == 0)
-			addNewPedestrian(-1, random.nextBoolean());
+			addNewPedestrian(-1, random.nextBoolean(), 0);
 		else
-			addNewPedestrian(4, random.nextBoolean());
+			addNewPedestrian(4, random.nextBoolean(), 0);
 	}
 
 	private void addRandomPedestrianFromClient() {
 		int startPosition = random.nextInt(2);
 		if (startPosition == 0)
-			addNewPedestrian(-2, random.nextBoolean());
+			addNewPedestrian(-2, random.nextBoolean(), 0);
 		else
-			addNewPedestrian(5, random.nextBoolean());
+			addNewPedestrian(5, random.nextBoolean(), 0);
 	}
 
-	private void addNewPedestrian(int position, boolean isInNorth) {
-		Pedestrian p = new Pedestrian(++lastPedestrianId, position, isInNorth);
+	private void addNewPedestrian(int position, boolean isInNorth, int crossAlot) {
+		Pedestrian p = new Pedestrian(++lastPedestrianId, position, isInNorth, crossAlot);
 		lock.lock();
 		pedestrians.add(p);
 		lock.unlock();
@@ -366,26 +366,16 @@ public class NeighberhoodSimulator {
 			if (garbageCansNorth[i] == true && garbageTruckNorth_location == i && isCleaningN)
 				garbageCansNorth[i] = false;
 			else {
-				if (garbageCansNorth[i] == false && !garbageCansNorthJustCleaned[i] && random.nextInt(10) == 0) // 1:10
-																												// chance
-																												// of
-																												// trash
-																												// can
-																												// becoming
-																												// full
+				// 1:10 chance of trash can becoming full
+				if (garbageCansNorth[i] == false && !garbageCansNorthJustCleaned[i] && random.nextInt(10) == 0)
 					garbageCansNorth[i] = true;
 			}
 
 			if (garbageCansSouth[i] == true && garbageTruckSouth_location == i && isCleaningS)
 				garbageCansSouth[i] = false;
 			else {
-				if (garbageCansSouth[i] == false && !garbageCansSouthJustCleaned[i] && random.nextInt(10) == 0) // 1:10
-																												// chance
-																												// of
-																												// trash
-																												// can
-																												// becoming
-																												// full
+				// 1:10 chance of trash can becoming full
+				if (garbageCansSouth[i] == false && !garbageCansSouthJustCleaned[i] && random.nextInt(10) == 0)
 					garbageCansSouth[i] = true;
 			}
 		}
@@ -439,7 +429,7 @@ public class NeighberhoodSimulator {
 			case "pedestrian":
 				try {
 					Object[] pedestrian = (Object[]) dataFromClient.get("pedestrian");
-					addNewPedestrian((int) pedestrian[0], (boolean) pedestrian[1]);
+					addNewPedestrian((int) pedestrian[0], (boolean) pedestrian[1], (int) pedestrian[2]);
 				} catch (ClassCastException e) {
 					addRandomPedestrianFromClient();
 				}
