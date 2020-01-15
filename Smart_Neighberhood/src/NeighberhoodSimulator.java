@@ -2,23 +2,25 @@ package src;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import src.ScenarioManager;
-
 import tau.smlab.syntech.executor.ControllerExecutor;
 import tau.smlab.syntech.executor.ControllerExecutorException;
 
 public class NeighberhoodSimulator {
-	/**
-	 * 
-	 */
+	private static String initiationFailed = "Error occured when trying to initiate controller";
+	private static String scenarioFinished = "Scenario inputs are done, it will run until default state";
+	private static String failedUpdateToSpectra = "Update to spectra failed due to an unknown reason";
+	private static String updaingToSpectra = "Updating environment variables in Spectra";
+	private static String fetchingFromSpectra = "Fetching system variables from Spectra";
 
 	private ControllerExecutor executor;
 	private Random random = new Random();
@@ -67,58 +69,10 @@ public class NeighberhoodSimulator {
 			updateEnvVarsInSpectra();
 			updateSystemVarsFromSpectra();
 		} catch (ControllerExecutorException e) {
-			// TODO: handle it gracefully.
+			SocketServer.colorMe(SocketServer.messageTypes.ERROR, initiationFailed, false);
+			System.exit(1);
 		}
 
-	}
-
-	private void printPedestLights() {
-		if (dayTime == DayTimeMode.DAY)
-			return;
-		String spaces;
-		System.out.println();
-		System.out.print("	");
-		for (int i = 0; i < N - 1; i++) {
-			if (lightsNorth[i])
-				System.out.print(String.format("LN%d+		", i));
-			else
-				System.out.print(String.format("LN%d-		", i));
-		}
-		System.out.println();
-		for (Pedestrian p : pedestrians) {
-			if (p.isInTheNorth && !p.isOnCrosswalk) {
-
-				if (p.position == -1)
-					spaces = "";
-				else
-					spaces = String.join("", Collections.nCopies((p.position) * 4, "    "));
-				System.out.println(spaces + "P" + p.position);
-			}
-		}
-		System.out.println();
-		for (Pedestrian p3 : pedestrians) {
-			if (p3.isOnCrosswalk)
-				System.out.println("				P in Crosswalk");
-			System.out.println();
-		}
-		System.out.print("	");
-		for (int i = 0; i < N - 1; i++) {
-			if (lightsSouth[i])
-				System.out.print(String.format("LS%d+		", i));
-			else
-				System.out.print(String.format("LS%d-		", i));
-		}
-		System.out.println();
-		for (Pedestrian p2 : pedestrians) {
-			if (!p2.isInTheNorth && !p2.isOnCrosswalk && p2.position != -1) {
-				if (p2.position == -1)
-					spaces = "";
-				else
-					spaces = String.join("", Collections.nCopies((p2.position) * 4, "    "));
-				System.out.println(spaces + "P" + p2.position);
-			}
-		}
-		System.out.println();
 	}
 
 	public void initiateScenarios(int scenario_num) {
@@ -137,15 +91,6 @@ public class NeighberhoodSimulator {
 			break;
 		case 5: // initiate scenario number 5
 			scenario = new ScenarioManager(5);
-			break;
-		case 6: // initiate scenario number 6
-			scenario = new ScenarioManager(6);
-			break;
-		case 7: // initiate scenario number 7
-			scenario = new ScenarioManager(7);
-			break;
-		case 8: // initiate scenario number 8
-			scenario = new ScenarioManager(8);
 			break;
 		}
 	}
@@ -169,17 +114,19 @@ public class NeighberhoodSimulator {
 			updateEnvVarsFromClient(dataFromClient);
 			break;
 		case 12: // wait for default state
-			dayTime = DayTimeMode.DAY;
-			energyEfficiencyMode = false;
 			moveAllPedestrians();
 			break;
 		case 100: // get scenario next state or random when scenario done
 			HashMap<String, Object> nextState = scenario.getNextState();
 			moveAllPedestrians();
-			if (nextState != null)
-				updateEnvVarsFromClient(nextState);
-			else
-				randomNextState();
+			updateEnvVarsFromClient(nextState);
+
+			if (scenario.scenarioQueue.size() == 0) {
+				SocketServer.colorMe(SocketServer.messageTypes.INFO, scenarioFinished, false);
+				canScenarioStart = false;
+				SocketServer.setNewUserMode("automatic");
+			}
+			
 			break;
 		}
 
@@ -188,8 +135,7 @@ public class NeighberhoodSimulator {
 			updateSystemVarsFromSpectra();
 
 		} catch (ControllerExecutorException e) {
-			// TODO: handle it gracefully.h{
-			System.out.println("Update to spectra failed due to an unknown reason");
+			SocketServer.colorMe(SocketServer.messageTypes.ERROR, failedUpdateToSpectra, false);
 			System.exit(1);
 		}
 
@@ -216,6 +162,8 @@ public class NeighberhoodSimulator {
 			return;
 
 		canScenarioStart = true;
+		dayTime = DayTimeMode.DAY;
+		energyEfficiencyMode = false;
 		sim_itter = 0;
 	}
 
@@ -235,28 +183,16 @@ public class NeighberhoodSimulator {
 	}
 
 	private void updateEnvVarsInSpectra() throws ControllerExecutorException {
-		System.out.println("Updating environment variables in Spectra");
-
-		System.out.println(Arrays.toString(garbageCansNorth));
-		System.out.println(Arrays.toString(garbageCansSouth));
-		for (Pedestrian p : pedestrians)
-			System.out.println(p.getPedestrianState());
-		System.out.println(garbageTruckNorth_location);
-		System.out.println(garbageTruckSouth_location);
-		System.out.println(isCleaningN);
-		System.out.println(isCleaningS);
-		System.out.println("--------------------");
+		SocketServer.colorMe(SocketServer.messageTypes.INFO, updaingToSpectra, false);
 
 		for (int i = 0; i < N; i++) {
 			garbageCansNorthJustCleaned[i] = false;
 			if (garbageCansNorth[i] == true && garbageTruckNorth_location == i && isCleaningN) {
 				garbageCansNorth[i] = false;
 				garbageCansNorthJustCleaned[i] = true;
-				System.out.println("Cleaned north at position " + i);
 			}
 			garbageCansSouthJustCleaned[i] = false;
 			if (garbageCansSouth[i] == true && garbageTruckSouth_location == i && isCleaningS) {
-				System.out.println("Cleaned south at position " + i);
 				garbageCansSouthJustCleaned[i] = true;
 				garbageCansSouth[i] = false;
 			}
@@ -267,8 +203,7 @@ public class NeighberhoodSimulator {
 		executor.setInputValue("dayTime", String.valueOf(dayTime));
 		executor.setInputValue("energyEfficiencyMode", String.valueOf(energyEfficiencyMode));
 
-		// first set all spectra pedestrian spaces to false, and then update from all
-		// pedestrians
+		// first set all spectra pedestrian spaces to false, and then update from all pedestrians
 		for (int i = 0; i < N * 2 + 1; i++) {
 			executor.setInputValue(String.format("pedestrians[%d]", i), "false");
 		}
@@ -283,15 +218,17 @@ public class NeighberhoodSimulator {
 			}
 		}
 
-		System.out.println("$$$$$$$$$$");
-		System.out.println(executor.getCurInputs());
+		JSONObject inputs = new JSONObject(executor.getCurInputs());
+		
 		executor.updateState(true, true);
-		System.out.println("#########");
-		System.out.println(executor.getCurOutputs());
+		
+		JSONObject outputs = new JSONObject(executor.getCurOutputs());
+		
+		Logger.spectraVarsStates.add(new JSONObject[] {inputs, outputs});
 	}
 
 	private void updateSystemVarsFromSpectra() throws ControllerExecutorException {
-		System.out.println("Getting system variables from Spectra");
+		SocketServer.colorMe(SocketServer.messageTypes.INFO, fetchingFromSpectra, false);
 
 		isCleaningN = Boolean.parseBoolean(executor.getCurValue("isCleaningN"));
 		isCleaningS = Boolean.parseBoolean(executor.getCurValue("isCleaningS"));

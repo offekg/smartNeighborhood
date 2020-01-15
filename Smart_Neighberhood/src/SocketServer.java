@@ -13,12 +13,13 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.util.StringTokenizer;
 import java.io.OutputStreamWriter;
+import java.awt.image.ColorModel;
 import java.io.BufferedOutputStream;
 import java.lang.ClassNotFoundException;
 import java.nio.charset.StandardCharsets;
 
 public class SocketServer {
-	private static enum messageTypes {
+	public static enum messageTypes {
 		INFO, ERROR, SUCCESS, WAITING
 	}
 
@@ -59,6 +60,7 @@ public class SocketServer {
 	private static String issueWithMessage = "Issue found with variable ";
 	private static String inputError = "Encountered an issue with request from cloent - " + "ignoring request";
 	private static String outputError = "Encountered an issue with response to cloent";
+	private static String failedToJson = "Could not load data to JSON";
 
 	private static int houseCount = 4;
 	private static String[] envVars = new String[] { "pedestrian", "garbageCansNorth", "garbageCansSouth", "dayTime",
@@ -68,12 +70,19 @@ public class SocketServer {
 	private static userMode mode = userMode.MANUAL;
 
 	public static void main(String args[]) throws IOException, ClassNotFoundException {
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+	        public void run() {
+	        	Logger log = new Logger();
+	    		log.createLog();
+	        }
+	    }, "Shutdown-thread"));
+		
 		server = new ServerSocket(port);
 
 		colorMe(messageTypes.INFO, creatingSpectraObject, true);
 		sim = new NeighberhoodSimulator();
 		colorMe(messageTypes.SUCCESS, spectraObjectCreated, true);
-
+		
 		while (true) {
 			colorMe(messageTypes.WAITING, waitingMessage, false);
 			Socket socket = server.accept();
@@ -85,6 +94,12 @@ public class SocketServer {
 			StringTokenizer parse = new StringTokenizer(input);
 			String method = parse.nextToken().toUpperCase(); // we get the HTTP method of the client
 			String path = parse.nextToken().toLowerCase(); // we get file requested
+						
+			if (path.contains("stop")) {
+				ois.close();
+				socket.close();
+				break;
+			}
 			
 			if (method.equals("GET")) {
 				handleGetRequest(path, socket, parse, dataDict);
@@ -95,14 +110,11 @@ public class SocketServer {
 			ois.close();
 			socket.close();
 			colorMe(messageTypes.SUCCESS, connectionEndedMessage, false);
-
-			// TODO: exit server gracefully
-			if ("".contains("1"))
-				break;
 		}
 
 		colorMe(messageTypes.INFO, shutdownMessage, true);
 		server.close();
+		System.exit(0);
 	}
 
 	/*********************************************************************************/
@@ -144,7 +156,7 @@ public class SocketServer {
 		return dataDict;
 	}
 
-	private static void colorMe(messageTypes type, String pleasePaintMe, boolean isHeader) {
+	public static void colorMe(messageTypes type, String pleasePaintMe, boolean isHeader) {
 		if (isHeader)
 			pleasePaintMe = headerPrefixSuffix + pleasePaintMe + headerPrefixSuffix;
 
@@ -164,7 +176,7 @@ public class SocketServer {
 		}
 	}
 
-	private static void setNewUserModeAccordingToUserRequest(String userRequest) {
+	public static void setNewUserMode(String userRequest) {
 		switch (userRequest) {
 		case "automatic":
 			mode = userMode.AUTOMATIC;
@@ -178,6 +190,7 @@ public class SocketServer {
 
 		colorMe(messageTypes.INFO, "Switching to mode: " + mode, false);
 	}
+	
 
 	/*********************************************************************************/
 	/* New connection functions */
@@ -277,8 +290,7 @@ public class SocketServer {
 		else if (path.contains("api")) {
 			if ((Boolean) dataDict.get("data_exists") == true) {
 				if (dataDict.containsKey("mode")) {
-					sim.canScenarioStart = false;
-					setNewUserModeAccordingToUserRequest((String) dataDict.get("mode"));
+					setNewUserMode((String) dataDict.get("mode"));
 				}
 				else
 					sim.updateEnvVarsFromClient(dataDict);
@@ -300,7 +312,7 @@ public class SocketServer {
 				try {
 					js = new JSONObject(s.split("data: ")[1]);
 				} catch (JSONException e) {
-					System.out.println("Could not load data to JSON");
+					colorMe(messageTypes.ERROR, failedToJson, false);
 					return null;
 				}
 			}

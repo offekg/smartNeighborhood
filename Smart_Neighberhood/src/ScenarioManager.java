@@ -73,7 +73,7 @@ public class ScenarioManager {
 		addStateToQueue(4, true, 0, null, 100, null, 100, "NIGHT", true);
 		addStateToQueue(-1, false, 0, null, 100, null, 100, "NIGHT", true);
 
-		addBlankStates(50, true);
+		//addBlankStates(50, true);
 	}
 
 	private void loadScenario2() {
