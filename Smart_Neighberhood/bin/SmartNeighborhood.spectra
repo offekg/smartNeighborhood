@@ -39,7 +39,6 @@ asm GF dayTime=NIGHT;
 
 
 //***Assumptions on pedestrian walking routes***
-//define crossing := crossingCrosswalkNS; //| crossingCrosswalkSN;	
 define crossing := pedestrians[PEDEST_WALK_SIZE-1];
 asm GF !crossing;
 
