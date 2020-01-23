@@ -1,5 +1,5 @@
 In order to run the simulation:
-1. Synthesis a controller
+1. Synthesis a controller (with energy bound of at least 3)
 2. Start the server by running the main function in SockerServer.java
 3. Navigate to http://localhost:9876/ to see the simulation. It is recommended
    to open it in a new "incognito" window using Chrome. If port 9876 is not available,
